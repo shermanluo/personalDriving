@@ -1,0 +1,2 @@
+paused = False
+kill = False
