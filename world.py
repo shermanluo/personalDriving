@@ -145,7 +145,8 @@ def get_initial_states(scenario):
         sys.exit()
     return x0_r, x0_h
 
-def world_test(init_planner=True):
+def world_test(initial_states='far_overtaking', 
+        interaction_data=None, init_planner=True):
     # lanes
     center_lane = lane.StraightLane([0., -1.], [0., 1.], constants.LANE_WIDTH_VIS)
     left_lane = center_lane.shifted(1)
@@ -177,7 +178,9 @@ def world_test(init_planner=True):
 
     # initialize planners
     for c in world.robot_cars:
-        c.init_planner()
+        if hasattr(c, 'init_planner'):
+            print 'Initializing planner for ' + c.name
+            c.init_planner()
 
     return world
 

@@ -117,23 +117,12 @@ class MaintainSpeedCar(RobotCar):
         self.planner = FixedControlPlanner(self.traj, fixed_control)
 
 class SimpleOptimizerCar(RobotCar):
-    def init_planner(self, init_plan_scheme):
+    def init_planner(self, init_plan_scheme=None):
         # Initialize the planner with the optimizer.
         r = self.traj.reward(self.reward.reward_th, fw=tt)
         self.optimizer = Maximizer(r, self.traj.u_th)
         self.planner = Planner(self.traj, self.optimizer, self.bounds, 
                                name=self.name)
-
-# class OldPredictReactCar(RobotCar):
-#     def init_planner(self, init_plan_scheme):
-#         # Initialize the planner with the optimizer.
-#         r_r = self.traj.reward(self.reward.reward_th, fw=tt)
-#         r_h = self.traj_h.reward(self.reward_h.reward_th, fw=tt)
-
-#         self.optimizer = OneIterationNestedMaximizer(
-#             r_h, self.traj_h, r_r, self.traj)
-#         self.planner = Planner(self.traj, self.optimizer, bounds=self.bounds,
-#                 other_bounds=self.human.bounds, name=self.name)
 
 class FollowerCar(Car):
     def __init__(self, x0, dt, dyn, bounds, horizon, color, name):
