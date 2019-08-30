@@ -16,9 +16,13 @@ import opt_timeup
 import time_profile
 import utils
 from utils import shape, jacobian, hessian, grad
+import pdb as pdb
+import ilqgames.python.CarExample as unicycle
+#pdb.set_trace()
+#import ilqgames.python.two_player_unicycle_4d_example as unicycle
 
 class Maximizer(object):
-    def __init__(self, f, vs, g={}, pre=None, gen=None, method='bfgs', eps=1, iters=100000, debug=False, inf_ignore=np.inf):
+    def __init__(self, f, vs, g={}, pre=None, gen=None, method='lbfgs', eps=1, iters=100000, debug=False, inf_ignore=np.inf):
         self.inf_ignore = inf_ignore
         self.debug = debug
         self.iters = iters
@@ -86,81 +90,342 @@ class Maximizer(object):
             opt = scipy.optimize.minimize(self.f_and_df, x0=x0, method=self.method, jac=True).x
         return opt
     def maximize(self, *args, **vargs):
-        return self.argmax(*args, **vargs)        
-
-class OneIterationNestedMaximizer(object):
-    def __init__(self, r_h, traj_h, r_r, traj_r):
+        return self.argmax(*args, **vargs)
+class IteratedBestResponseMaximizer(object):
+    def __init__(self, r_h, traj_h, r_r, traj_r, use_timeup=True,
+                 use_second_order=False, update_with_curr_plan_fn=None,
+                 init_plan_scheme='prev_opt',
+                 # num_optimizations_r=1, get_init_plan_r_fn=None,
+                 # num_optimizations_h=1, get_init_plan_h_fn=None,
+                 init_grads=True):
         """
         Arguments:
             - r_h: the human tactical reward.
             - traj_h: the human trajectory.
             - r_r: the robot tactical reward.
             - traj_r: the robot trajectory.
+            - update_with_curr_plan_fn: function to update any necessary information
+                based on the current plan. This is only necessary for the
+                HierarchicalMaximizer, not the NestedMaximizer.
+            - init_plan_scheme: string specifying the plan initialization scheme.
+            - num_optimizations_r: number of times to optimize the robot reward (the
+                best result of these optimizations will be chosen).
+            - get_init_plan_r_fn: function to return a function that initializes
+                the robot's plan for optimization, based on the current optimization
+                iteration.
+            - num_optimizations_h: number of times to optimize the human reward (the
+                best result of these optimizations will be chosen).
+            - get_init_plan_h_fn: function to return a function that initializes
+                the human's plan for optimization, based on the current optimization
+                iteration.
+            - init_grads: if True, initialize the gradients. This argument can be
+                set to False if another function is meant to initialize the gradients.
         """
-        # self.r_h = r_h
-        # self.r_r = r_r
+
+        # ---------------------------------------------------------------------------------------------------
+        # Basics.
+
+        self.r_h = r_h
+        self.r_r = r_r
         self.traj_h = traj_h
         self.traj_r = traj_r
-        self.plan_h = traj_h.u_th # human plan (controls)
-        self.plan_r = traj_r.u_th # robot plan (controls)
-        self.human_optimizer = Maximizer(r_h, self.plan_h)
-        self.robot_optimizer = Maximizer(r_r, self.plan_r)
+        self.plan_h = traj_h.u_th  # human plan (controls)
+        self.plan_r = traj_r.u_th  # robot plan (controls)
+        # (start, end) indices for each control in the plan when it's represented
+        # as a flattened array. Ex: [(0, 2), (2, 4), (4, 6), (6, 8), (8, 10)]
+        self.control_indices_h = traj_h.control_indices
+        self.control_indices_r = traj_r.control_indices
+        # maximum time for optimization
+        if use_timeup:
+            self.timeup = config.OPT_TIMEOUT
+        else:
+            self.timeup = float('inf')
+        self.use_second_order = use_second_order
+        if update_with_curr_plan_fn is None:  # no functionality necessary here
+            update_with_curr_plan_fn = lambda: None
+        self.update_with_curr_plan_fn = update_with_curr_plan_fn
+        self.create_get_init_plans_fn(init_plan_scheme)
 
-    def maximize(self, other_vals={}, other_bounds={}, vals={}, bounds={}):
-        # Assume human is other and robot is this
-        # Find the optimal human plan
-        opt_plan_h = self.human_optimizer.maximize(vals=other_vals, bounds=other_bounds)
+        self.maximizer_inner_iters_r = 0  # number of iterations of maximizer_inner
+        self.maximizer_inner_iters_h = 0
 
-        # Set the robot's belief of the human plan to the predicted/planned
-        # human plan
-        for v, (a, b) in zip(self.plan_h, self.traj_h.control_indices):
+        if init_grads:  # initialize the gradients
+            self.init_grads()
+
+    def create_get_init_plans_fn(self, init_plan_scheme):
+        """Create the functions that return the plan initialization functions
+        for the robot and the human, depending on the optimization iteration.
+        Also set the number of optimization loops for the robot and human.
+        Arguments:
+            - init_plan_scheme: string specifying the plan initialization scheme.
+        """
+        assert init_plan_scheme in constants.INIT_PLAN_SCHEMES_OPTIONS
+        self.get_init_plan_r_fn = eval('self.get_init_plan_r_fn_' + init_plan_scheme)
+        self.get_init_plan_h_fn = eval('self.get_init_plan_h_fn_' + init_plan_scheme)
+        self.num_optimizations_r = constants.INIT_PLAN_SCHEME_TO_NUM_OPTS_R[init_plan_scheme]
+        self.num_optimizations_h = constants.INIT_PLAN_SCHEME_TO_NUM_OPTS_H[init_plan_scheme]
+    def get_init_plan_r_fn_maintain_speed_lsr_and_prev_opt(self, iter):
+        # TODO: comment this
+        v = self.traj_r.x0[3]
+        acc = constants.FRICTION * v ** 2
+        init_plan_r_fn_list = [
+            lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][0], acc] for _ in range(self.traj_r.horizon)),
+            lambda: np.hstack([0., acc] for _ in range(self.traj_r.horizon)),
+            lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][1], acc] for _ in range(self.traj_r.horizon)),
+            lambda: np.hstack([v.get_value() for v in self.plan_r[:-1]] + [self.traj_r.default_control])
+        ]
+        return init_plan_r_fn_list[iter]
+    def get_init_plan_h_fn_maintain_speed_lsr_and_prev_opt(self, iter):
+        # TODO: comment this
+        v = self.traj_h.x0[3]
+        acc = constants.FRICTION * v ** 2
+        init_plan_h_fn_list = [
+            lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][0], acc] for _ in range(self.traj_h.horizon)),
+            lambda: np.hstack([0., acc] for _ in range(self.traj_h.horizon)),
+            lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][1], acc] for _ in range(self.traj_h.horizon)),
+            lambda: np.hstack([v.get_value() for v in self.plan_h[:-1]] + [self.traj_h.default_control])
+        ]
+        return init_plan_h_fn_list[iter]
+    def get_init_plan_r_fn_maintain_speed_lsr(self, iter):
+        # TODO: comment this
+        v = self.traj_r.x0[3]
+        acc = constants.FRICTION * v ** 2
+        init_plan_r_fn_list = [
+            lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][0], acc] for _ in range(self.traj_r.horizon)),
+            lambda: np.hstack([0., acc] for _ in range(self.traj_r.horizon)),
+            lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][1], acc] for _ in range(self.traj_r.horizon))
+        ]
+        return init_plan_r_fn_list[iter]
+    def get_init_plan_h_fn_maintain_speed_lsr(self, iter):
+        # TODO: comment this
+        v = self.traj_h.x0[3]
+        acc = constants.FRICTION * v ** 2
+        init_plan_h_fn_list = [
+            lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][0], acc] for _ in range(self.traj_h.horizon)),
+            lambda: np.hstack([0., acc] for _ in range(self.traj_h.horizon)),
+            lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][1], acc] for _ in range(self.traj_h.horizon))
+        ]
+        return init_plan_h_fn_list[iter]
+    def get_init_plan_r_fn_lsr(self, iter):
+        # TODO: comment this
+        init_plan_r_fn_list = [
+            lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][0], 0.] for _ in range(self.traj_r.horizon)),
+            lambda: np.hstack([0., 0.] for _ in range(self.traj_r.horizon)),
+            lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][1], 0.] for _ in range(self.traj_r.horizon))
+        ]
+        return init_plan_r_fn_list[iter]
+    def get_init_plan_h_fn_lsr(self, iter):
+        # TODO: comment this
+        init_plan_h_fn_list = [
+            lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][0], 0.] for _ in range(self.traj_h.horizon)),
+            lambda: np.hstack([0., 0.] for _ in range(self.traj_h.horizon)),
+            lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][1], 0.] for _ in range(self.traj_h.horizon))
+        ]
+        return init_plan_h_fn_list[iter]
+    def get_init_plan_r_fn_max_speed_prev_steer(self, iter):
+        # TODO: comment this
+        return lambda: np.hstack([[v.get_value()[0], constants.CAR_CONTROL_BOUNDS[1][1]] for v in self.plan_r[:-1]] + [
+            self.traj_r.default_control[0], constants.CAR_CONTROL_BOUNDS[1][1]])
+    def get_init_plan_h_fn_max_speed_prev_steer(self, iter):
+        # TODO: comment this
+        return lambda: np.hstack([[v.get_value()[0], constants.CAR_CONTROL_BOUNDS[1][1]] for v in self.plan_h[:-1]] + [
+            self.traj_h.default_control[0], constants.CAR_CONTROL_BOUNDS[1][1]])
+    def get_init_plan_r_fn_maintain_speed_prev_steer(self, iter):
+        # TODO: comment this
+        v = self.traj_r.x0[3]
+        acc = constants.FRICTION * v ** 2
+        return lambda: np.hstack(
+            [[v.get_value()[0], acc] for v in self.plan_r[:-1]] + [self.traj_r.default_control[0], acc])
+    def get_init_plan_h_fn_maintain_speed_prev_steer(self, iter):
+        # TODO: comment this
+        v = self.traj_h.x0[3]
+        acc = constants.FRICTION * v ** 2
+        return lambda: np.hstack(
+            [[v.get_value()[0], acc] for v in self.plan_h[:-1]] + [self.traj_h.default_control[0], acc])
+    def get_init_plan_r_fn_prev_opt(self, iter):
+        # TODO: comment this
+        """Initialize the robot plan using the default way."""
+        return lambda: np.hstack([v.get_value() for v in self.plan_r[:-1]] + [self.traj_r.default_control])
+    def get_init_plan_h_fn_prev_opt(self, iter):
+        # TODO: comment this
+        """Initialize the human's plan using the default way."""
+        return lambda: np.hstack([v.get_value() for v in self.plan_h[:-1]] + [self.traj_h.default_control])
+    def get_my_init(self, iter):
+        return lambda: np.hstack((0, -2 * 0.0878) for _ in range(self.traj_h.horizon))
+    def get_my_init2(self, iter):
+        return lambda: np.hstack((0, -8 * 0.0878) for _ in range(self.traj_h.horizon))
+    def init_grads(self):
+        """Initialize the gradients based on the rewards.
+        Precondition: the rewards (self.r_h and self.r_r) have already been
+        initialized.
+        """
+        # gradient of human reward wrt human controls
+        self.dr_h = grad(self.r_h, self.plan_h)
+        # negative human reward and its derivative
+        self.func1 = th.function([], [-self.r_h, -self.dr_h])
+
+        def r_h_and_dr_h(plan_h_0):
+            """Evaluate negative human reward and its derivative.
+            - plan_h_0: initial value for human plan."""
+            start_time = time.time()
+            # set plan_h to the given (initial) plan_h_0
+            for v, (a, b) in zip(self.plan_h, self.control_indices_h):
+                v.set_value(plan_h_0[a:b])
+            # do any necessary updates based on the current plan
+            # (this is necessary for the HierarchicalMaximizer, not the Nested Maximizer)
+            self.update_with_curr_plan_fn()
+            func1_val = self.func1()  # negative human reward and its derivative
+            end_time = time.time()
+            time_profile.inner_loop_time_profile.update(start_time, end_time)
+            return func1_val
+
+        self.r_h_and_dr_h = r_h_and_dr_h
+
+        # ------------------------------------------------------------------------------------------
+        # Robot's reward and its derivative.
+
+        # ------------------------------------------------------------------------------------------
+        # OPTION 2: Partial derivative computation. FAST
+        # (Only direct effect of robot action given current human action)
+        # Below is the simplified derivative that neglects the second-order
+        # effect through human (and therefore avoids the heavy Hessian
+        # inversion)
+        self.dr_r = grad(self.r_r, self.plan_r)
+        # ------------------------------------------------------------------------------------------
+
+        # negative robot reward and its derivative
+        self.func2 = th.function([], [-self.r_r, -self.dr_r])
+
+        def r_r_and_dr_r(plan_r_0):
+            """Get optimal human response, and return negative robot reward
+            and its derivative.
+            - plan_r_0: initial value for robot plan."""
+            # set self.plan_r to the given (initial) plan_r_0
+            for v, (a, b) in zip(self.plan_r, self.control_indices_r):
+                v.set_value(plan_r_0[a:b])
+            start_time = time.time()
+            func2_val = self.func2()  # negative robot reward and its derivative
+            end_time = time.time()
+            time_profile.func2_time_profile.update(start_time, end_time)
+            return func2_val
+
+        self.r_r_and_dr_r = r_r_and_dr_r
+
+    def maximize_h(self, bounds={}, maxiter=config.NESTEDMAX_MAXITER_INNER):
+        """Get optimal human response (controls).
+        Arguments:
+        - bounds: control bounds for the human.
+        - maxiter: maximum number of iterations.
+        """
+        start_time = time.time()
+
+        bounds = constants.CAR_CONTROL_BOUNDS
+        if not isinstance(bounds, dict):  # convert bounds to dictionary
+            bounds = {v: bounds for v in self.plan_h}
+        B = []  # list of bounds for each control in the plan
+        for v, (a, b) in zip(self.plan_h, self.control_indices_h):
+            if v in bounds:
+                B += bounds[v]
+            else:
+                B += [(None, None)] * (b - a)
+
+        # TODO: can we replace the .get_value() approach with using the numpy
+        # version because at this point the Theano and numpy plans are the same?
+        # plan_h_0 = np.hstack(self.traj_h.u) # initial robot plan (numpy version)
+        plan_h_0 = np.hstack([v.get_value() for v in self.plan_h])
+
+        # optimal human response, value, etc.
+        opt_h = scipy.optimize.fmin_l_bfgs_b(self.r_h_and_dr_h, x0=plan_h_0,
+                                             bounds=B)
+        opt_plan_h = opt_h[0]  # optimal human response
+
+        for v, (a, b) in zip(self.plan_h, self.control_indices_h):
             v.set_value(opt_plan_h[a:b])
 
-        # Find the optimal robot plan
-        return self.robot_optimizer.maximize(vals=vals, bounds=bounds)
+        # do any necessary updates based on the current plan
+        # (this is necessary for the HierarchicalMaximizer, not the Nested Maximizer)
+        self.update_with_curr_plan_fn()
+
+        # increment the counter for the number of iterations of maximizer_inner
+        self.maximizer_inner_iters_h += 1
+        end_time = time.time()
+        time_profile.maximize_inner_time_profile.update(start_time, end_time)
+        return opt_h
+
+    def maximize_r(self, bounds={}, maxiter=config.NESTEDMAX_MAXITER_INNER):
+        """Get optimal human response (controls).
+        Arguments:
+        - bounds: control bounds for the human.
+        - maxiter: maximum number of iterations.
+        """
+        start_time = time.time()
+        bounds = constants.CAR_CONTROL_BOUNDS
+        if not isinstance(bounds, dict):  # convert bounds to dictionary
+            bounds = {v: bounds for v in self.plan_r}
+        B = []  # list of bounds for each control in the plan
+        for v, (a, b) in zip(self.plan_r, self.control_indices_r):
+            if v in bounds:
+                B += bounds[v]
+            else:
+                B += [(None, None)] * (b - a)
+        plan_r_0 = np.hstack([v.get_value() for v in self.plan_r])
+
+        # optimal human response, value, etc.
+        opt_r = scipy.optimize.fmin_l_bfgs_b(self.r_r_and_dr_r, x0=plan_r_0,
+                                             bounds = B)
+        opt_plan_r = opt_r[0]  # optimal human response
+
+        for v, (a, b) in zip(self.plan_r, self.control_indices_r):
+            v.set_value(opt_plan_r[a:b])
+
+        # do any necessary updates based on the current plan
+        # (this is necessary for the HierarchicalMaximizer, not the Nested Maximizer)
+        self.update_with_curr_plan_fn()
+
+        # increment the counter for the number of iterations of maximizer_inner
+        self.maximizer_inner_iters_r += 1
+        end_time = time.time()
+        time_profile.maximize_inner_time_profile.update(start_time, end_time)
+        return opt_r
+
+    def maximize(self, bounds={}, bounds_inner={},
+                 maxiter_inner=config.NESTEDMAX_MAXITER_INNER):
+        # Get optimal robot plan (controls) and human response using nested
+        # optimization.
+        start_time = time.time()
+
+        #for r in range(self.num_optimizations_r):
+        #   for h in range(self.num_optimizations_h):
+        self.init_plan_r = self.get_init_plan_r_fn(0)
+        self.init_plan_h = self.get_init_plan_h_fn(0)
 
 
-# class SimpleMaximizer(object):
-#     # Just simple maximization of the reward ignoring any interaction with other agents.
-#     # This is for example used for the sucessor of a truck, the predecessor's control is treated as fixed.
-#     # The whole code is taken from NestedMaximizer.
-#     def __init__(self, f1, vs1, use_timeup=True):
-#         self.f1 = f1
-#         self.vs1 = vs1
-#         self.sz1 = [shape(v)[0] for v in self.vs1]
-#         for i in range(1, len(self.sz1)):
-#             self.sz1[i] += self.sz1[i-1]
-#         self.sz1 = [(0 if i==0 else self.sz1[i-1], self.sz1[i]) for i in range(len(self.sz1))]
-#         if use_timeup:
-#             self.timeup = config.OPT_TIMEOUT
-#         else:
-#             self.timeup = float('inf')
-#         self.df1 = grad(self.f1, vs1)
-#         self.new_vs1 = [tt.vector() for v in self.vs1]
-#         self.func1 = th.function(self.new_vs1, [-self.f1, -self.df1], givens=zip(self.vs1, self.new_vs1))
-#         def f1_and_df1(x0):
-#             return self.func1(*[x0[a:b] for a, b in self.sz1])
-#         self.f1_and_df1 = f1_and_df1
-#     def maximize(self, bounds={}):
-#         t0 = time.time()
-#         if not isinstance(bounds, dict):
-#             bounds = {v: bounds for v in self.vs1}
-#         B = []
-#         for v, (a, b) in zip(self.vs1, self.sz1):
-#             if v in bounds:
-#                 B += bounds[v]
-#             else:
-#                 B += [(None, None)]*(b-a)
-#         x0 = np.hstack([v.get_value() for v in self.vs1])
-#         opt = opt_timeup.fmin_l_bfgs_b_timeup(self.f1_and_df1, x0=x0, bounds=B,
-#                                               t0=t0, timeup=self.timeup)
-#         opt = opt[0]
-#         for v, (a, b) in zip(self.vs1, self.sz1):
-#             v.set_value(opt[a:b])
+        #self.init_plan_r = self.get_my_init2(0)
+        #self.init_plan_h = self.get_my_init(0)
+        #self.init_plan_h = self.get_my_init2(0)
+        #
+        # #pdb.set_trace()
+        opt_plan_r = self.init_plan_r()
+        opt_plan_h = self.init_plan_h()
+        for v, (a, b) in zip(self.plan_r, self.control_indices_r):
+            v.set_value(opt_plan_r[a:b])
+        for v, (a, b) in zip(self.plan_h, self.control_indices_h):
+            v.set_value(opt_plan_h[a:b])
 
 
+        #pdb.set_trace()
+        for i in range(5):
+            opt_r = self.maximize_r(bounds = bounds)
+            opt_h = self.maximize_h(bounds = bounds)
+            #print([x.get_value() for x in self.plan_r])
+            #print([x.get_value() for x in self.plan_h])
+        #pdb.set_trace()
+        # time profile of HierarchicalMaximizer
+        maximize_end_time = time.time()
+        time_profile.maximizer_time_profile.update(start_time, maximize_end_time)
+        return opt_r[0], opt_h[0]
 class NestedMaximizer(object):
-    def __init__(self, r_h, traj_h, r_r, traj_r, use_timeup=True, 
+    def __init__(self, r_h, traj_h, r_r, traj_r, use_timeup=True,
             use_second_order=False, update_with_curr_plan_fn=None,
             init_plan_scheme='prev_opt',
             # num_optimizations_r=1, get_init_plan_r_fn=None,
@@ -173,20 +438,20 @@ class NestedMaximizer(object):
             - r_r: the robot tactical reward.
             - traj_r: the robot trajectory.
             - update_with_curr_plan_fn: function to update any necessary information
-                based on the current plan. This is only necessary for the 
+                based on the current plan. This is only necessary for the
                 HierarchicalMaximizer, not the NestedMaximizer.
             - init_plan_scheme: string specifying the plan initialization scheme.
             - num_optimizations_r: number of times to optimize the robot reward (the
                 best result of these optimizations will be chosen).
-            - get_init_plan_r_fn: function to return a function that initializes 
+            - get_init_plan_r_fn: function to return a function that initializes
                 the robot's plan for optimization, based on the current optimization
                 iteration.
             - num_optimizations_h: number of times to optimize the human reward (the
                 best result of these optimizations will be chosen).
-            - get_init_plan_h_fn: function to return a function that initializes 
+            - get_init_plan_h_fn: function to return a function that initializes
                 the human's plan for optimization, based on the current optimization
                 iteration.
-            - init_grads: if True, initialize the gradients. This argument can be 
+            - init_grads: if True, initialize the gradients. This argument can be
                 set to False if another function is meant to initialize the gradients.
         """
 
@@ -212,7 +477,7 @@ class NestedMaximizer(object):
         if update_with_curr_plan_fn is None: # no functionality necessary here
             update_with_curr_plan_fn = lambda: None
         self.update_with_curr_plan_fn = update_with_curr_plan_fn
-        
+
         # self.num_optimizations_r = num_optimizations_r
         # if get_init_plan_r_fn is None:
         #     self.get_init_plan_r_fn = self.get_init_plan_r_fn_default
@@ -254,7 +519,6 @@ class NestedMaximizer(object):
             lambda: np.hstack([v.get_value() for v in self.plan_r[:-1]] + [self.traj_r.default_control])
             ]
         return init_plan_r_fn_list[iter]
-
     def get_init_plan_h_fn_maintain_speed_lsr_and_prev_opt(self, iter):
         # TODO: comment this
         v = self.traj_h.x0[3]
@@ -266,7 +530,6 @@ class NestedMaximizer(object):
             lambda: np.hstack([v.get_value() for v in self.plan_h[:-1]] + [self.traj_h.default_control])
             ]
         return init_plan_h_fn_list[iter]
-
     def get_init_plan_r_fn_maintain_speed_lsr(self, iter):
         # TODO: comment this
         v = self.traj_r.x0[3]
@@ -277,7 +540,6 @@ class NestedMaximizer(object):
             lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][1], acc] for _ in range(self.traj_r.horizon))
             ]
         return init_plan_r_fn_list[iter]
-
     def get_init_plan_h_fn_maintain_speed_lsr(self, iter):
         # TODO: comment this
         v = self.traj_h.x0[3]
@@ -288,7 +550,6 @@ class NestedMaximizer(object):
             lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][1], acc] for _ in range(self.traj_h.horizon))
             ]
         return init_plan_h_fn_list[iter]
-
     def get_init_plan_r_fn_lsr(self, iter):
         # TODO: comment this
         init_plan_r_fn_list = [
@@ -297,7 +558,6 @@ class NestedMaximizer(object):
             lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][1], 0.] for _ in range(self.traj_r.horizon))
             ]
         return init_plan_r_fn_list[iter]
-
     def get_init_plan_h_fn_lsr(self, iter):
         # TODO: comment this
         init_plan_h_fn_list = [
@@ -306,32 +566,26 @@ class NestedMaximizer(object):
             lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][1], 0.] for _ in range(self.traj_h.horizon))
             ]
         return init_plan_h_fn_list[iter]
-
     def get_init_plan_r_fn_max_speed_prev_steer(self, iter):
         # TODO: comment this
         return lambda: np.hstack([[v.get_value()[0], constants.CAR_CONTROL_BOUNDS[1][1]] for v in self.plan_r[:-1]] + [self.traj_r.default_control[0], constants.CAR_CONTROL_BOUNDS[1][1]])
-
     def get_init_plan_h_fn_max_speed_prev_steer(self, iter):
         # TODO: comment this
         return lambda: np.hstack([[v.get_value()[0], constants.CAR_CONTROL_BOUNDS[1][1]] for v in self.plan_h[:-1]] + [self.traj_h.default_control[0], constants.CAR_CONTROL_BOUNDS[1][1]])
-
     def get_init_plan_r_fn_maintain_speed_prev_steer(self, iter):
         # TODO: comment this
         v = self.traj_r.x0[3]
         acc = constants.FRICTION * v**2
         return lambda: np.hstack([[v.get_value()[0], acc] for v in self.plan_r[:-1]] + [self.traj_r.default_control[0], acc])
-
     def get_init_plan_h_fn_maintain_speed_prev_steer(self, iter):
         # TODO: comment this
         v = self.traj_h.x0[3]
         acc = constants.FRICTION * v**2
         return lambda: np.hstack([[v.get_value()[0], acc] for v in self.plan_h[:-1]] + [self.traj_h.default_control[0], acc])
-
     def get_init_plan_r_fn_prev_opt(self, iter):
         # TODO: comment this
         """Initialize the robot plan using the default way."""
         return lambda: np.hstack([v.get_value() for v in self.plan_r[:-1]] + [self.traj_r.default_control])
-
     def get_init_plan_h_fn_prev_opt(self, iter):
         # TODO: comment this
         """Initialize the human's plan using the default way."""
@@ -340,7 +594,7 @@ class NestedMaximizer(object):
 
     def init_grads(self):
         """Initialize the gradients based on the rewards.
-        Precondition: the rewards (self.r_h and self.r_r) have already been 
+        Precondition: the rewards (self.r_h and self.r_r) have already been
         initialized.
         """
         # gradient of human reward wrt human controls
@@ -368,7 +622,7 @@ class NestedMaximizer(object):
 
         # ------------------------------------------------------------------------------------------
         if self.use_second_order:
-            # OPTION 1: Full derivative computation with Hessian inversion. 
+            # OPTION 1: Full derivative computation with Hessian inversion.
             # SLOW, DEPRECATED
             # jacobian of (d human reward / d robot actions) w.r.t. human actions
             J = jacobian(grad(self.r_h, self.plan_r), self.plan_h)
@@ -382,8 +636,8 @@ class NestedMaximizer(object):
         else:
             # OPTION 2: Partial derivative computation. FAST
             # (Only direct effect of robot action given current human action)
-            # Below is the simplified derivative that neglects the second-order 
-            # effect through human (and therefore avoids the heavy Hessian 
+            # Below is the simplified derivative that neglects the second-order
+            # effect through human (and therefore avoids the heavy Hessian
             # inversion)
             self.dr_r = grad(self.r_r, self.plan_r)
         # ------------------------------------------------------------------------------------------
@@ -391,7 +645,7 @@ class NestedMaximizer(object):
         # negative robot reward and its derivative
         self.func2 = th.function([], [-self.r_r, -self.dr_r])
         def r_r_and_dr_r(plan_r_0):
-            """Get optimal human response, and return negative robot reward 
+            """Get optimal human response, and return negative robot reward
             and its derivative.
             - plan_r_0: initial value for robot plan."""
             # set self.plan_r to the given (initial) plan_r_0
@@ -404,7 +658,6 @@ class NestedMaximizer(object):
             time_profile.func2_time_profile.update(start_time, end_time)
             return func2_val
         self.r_r_and_dr_r = r_r_and_dr_r
-
     def maximize_inner(self, bounds={}, maxiter=config.NESTEDMAX_MAXITER_INNER):
         """Get optimal human response (controls).
         Arguments:
@@ -412,7 +665,7 @@ class NestedMaximizer(object):
         - maxiter: maximum number of iterations.
         """
         start_time = time.time()
-        
+
         bounds = constants.HIERARCHICAL_HUMAN_CONTROL_BOUNDS
         if not isinstance(bounds, dict): # convert bounds to dictionary
             bounds = {v: bounds for v in self.plan_h}
@@ -422,8 +675,8 @@ class NestedMaximizer(object):
                 B += bounds[v]
             else:
                 B += [(None, None)]*(b-a)
-        
-        
+
+
         # TODO: can we replace the .get_value() approach with using the numpy
         # version because at this point the Theano and numpy plans are the same?
         # plan_h_0 = np.hstack(self.traj_h.u) # initial robot plan (numpy version)
@@ -433,9 +686,9 @@ class NestedMaximizer(object):
         else:
             # initialize human plan to previous optimal value
             plan_h_0 = np.hstack([v.get_value() for v in self.plan_h])
-        
+
         # optimal human response, value, etc.
-        opt_h = scipy.optimize.fmin_l_bfgs_b(self.r_h_and_dr_h, x0=plan_h_0, 
+        opt_h = scipy.optimize.fmin_l_bfgs_b(self.r_h_and_dr_h, x0=plan_h_0,
                 bounds=B)
         opt_plan_h = opt_h[0] # optimal human response
 
@@ -445,14 +698,13 @@ class NestedMaximizer(object):
         # do any necessary updates based on the current plan
         # (this is necessary for the HierarchicalMaximizer, not the Nested Maximizer)
         self.update_with_curr_plan_fn()
-        
+
         # increment the counter for the number of iterations of maximizer_inner
         self.maximizer_inner_iters += 1
         end_time = time.time()
         time_profile.maximize_inner_time_profile.update(start_time, end_time)
         return opt_h
-
-    def maximize(self, bounds={}, bounds_inner={}, 
+    def maximize(self, bounds={}, bounds_inner={},
                 maxiter_inner=config.NESTEDMAX_MAXITER_INNER):
         # Get optimal robot plan (controls) and human response using nested
         # optimization.
@@ -465,7 +717,6 @@ class NestedMaximizer(object):
                 B += bounds[v]
             else:
                 B += [(None, None)]*(b-a)
-        
 
         opt_r_list = [] # list of optimization results
         for i in range(self.num_optimizations_r):
@@ -475,7 +726,7 @@ class NestedMaximizer(object):
             plan_r_0 = self.get_init_plan_r_fn(i)() # initialize the robot's plan
             # plan_r_0 = np.hstack([v.get_value() for v in self.plan_r])
             for j in range(self.num_optimizations_h):
-                
+
                 # debugging
                 # print('robot optimization iter:', i)
                 # print('human optimization iter:', j)
@@ -485,15 +736,15 @@ class NestedMaximizer(object):
                 # get the human's plan initialization function
                 self.init_plan_h = self.get_init_plan_h_fn(j)
                 # optimal robot control, value, etc.
-                opt_r = opt_timeup.fmin_l_bfgs_b_timeup(self.r_r_and_dr_r, 
+                opt_r = opt_timeup.fmin_l_bfgs_b_timeup(self.r_r_and_dr_r,
                     x0=plan_r_0, bounds=B, t0=start_time, timeup=self.timeup)
                 opt_r_list.append(opt_r)
                 # opt_plan_r = opt_r[0] # optimal robot control
-
         # get the best plan based on its value
         best_opt_r = min(opt_r_list, key=lambda opt: opt[1])
         opt_plan_r = best_opt_r[0] # optimal robot control
-        
+        #pdb.set_trace()
+
         # debugging
         # print('opt_r_list:', opt_r_list)
         # print('best_opt_r:', best_opt_r)
@@ -505,11 +756,358 @@ class NestedMaximizer(object):
         # optimal human response, value, etc. to optimal robot control
         opt_h = self.maximize_inner(bounds=bounds_inner, maxiter=maxiter_inner)
 
+        print([x.get_value() for x in self.plan_r])
+        print([x.get_value() for x in self.plan_h])
         # time profile of HierarchicalMaximizer
         maximize_end_time = time.time()
         time_profile.maximizer_time_profile.update(start_time, maximize_end_time)
-        return opt_r, opt_h
+        return opt_r[0], opt_h[0]
 
+
+# class NestedMaximizer(object):
+#     def __init__(self, r_h, traj_h, r_r, traj_r, use_timeup=True,
+#                  use_second_order=False, update_with_curr_plan_fn=None,
+#                  init_plan_scheme='prev_opt',
+#                  # num_optimizations_r=1, get_init_plan_r_fn=None,
+#                  # num_optimizations_h=1, get_init_plan_h_fn=None,
+#                  init_grads=True):
+#         """
+#         Arguments:
+#             - r_h: the human tactical reward.
+#             - traj_h: the human trajectory.
+#             - r_r: the robot tactical reward.
+#             - traj_r: the robot trajectory.
+#             - update_with_curr_plan_fn: function to update any necessary information
+#                 based on the current plan. This is only necessary for the
+#                 HierarchicalMaximizer, not the NestedMaximizer.
+#             - init_plan_scheme: string specifying the plan initialization scheme.
+#             - num_optimizations_r: number of times to optimize the robot reward (the
+#                 best result of these optimizations will be chosen).
+#             - get_init_plan_r_fn: function to return a function that initializes
+#                 the robot's plan for optimization, based on the current optimization
+#                 iteration.
+#             - num_optimizations_h: number of times to optimize the human reward (the
+#                 best result of these optimizations will be chosen).
+#             - get_init_plan_h_fn: function to return a function that initializes
+#                 the human's plan for optimization, based on the current optimization
+#                 iteration.
+#             - init_grads: if True, initialize the gradients. This argument can be
+#                 set to False if another function is meant to initialize the gradients.
+#         """
+#
+#         # ---------------------------------------------------------------------------------------------------
+#         # Basics.
+#
+#         self.r_h = r_h
+#         self.r_r = r_r
+#         self.traj_h = traj_h
+#         self.traj_r = traj_r
+#         self.plan_h = traj_h.u_th  # human plan (controls)
+#         self.plan_r = traj_r.u_th  # robot plan (controls)
+#         # (start, end) indices for each control in the plan when it's represented
+#         # as a flattened array. Ex: [(0, 2), (2, 4), (4, 6), (6, 8), (8, 10)]
+#         self.control_indices_h = traj_h.control_indices
+#         self.control_indices_r = traj_r.control_indices
+#         # maximum time for optimization
+#         if use_timeup:
+#             self.timeup = config.OPT_TIMEOUT
+#         else:
+#             self.timeup = float('inf')
+#         self.use_second_order = use_second_order
+#         if update_with_curr_plan_fn is None:  # no functionality necessary here
+#             update_with_curr_plan_fn = lambda: None
+#         self.update_with_curr_plan_fn = update_with_curr_plan_fn
+#
+#         # self.num_optimizations_r = num_optimizations_r
+#         # if get_init_plan_r_fn is None:
+#         #     self.get_init_plan_r_fn = self.get_init_plan_r_fn_default
+#         # else:
+#         #     self.get_init_plan_r_fn = get_init_plan_r_fn
+#         # self.num_optimizations_h = num_optimizations_h
+#         # if get_init_plan_h_fn is None:
+#         #     self.get_init_plan_h_fn = self.get_init_plan_h_fn_default
+#         # else:
+#         #     self.get_init_plan_h_fn = get_init_plan_h_fn
+#         self.create_get_init_plans_fn(init_plan_scheme)
+#
+#         self.maximizer_inner_iters = 0  # number of iterations of maximizer_inner
+#
+#         if init_grads:  # initialize the gradients
+#             self.init_grads()
+#
+#     def create_get_init_plans_fn(self, init_plan_scheme):
+#         """Create the functions that return the plan initialization functions
+#         for the robot and the human, depending on the optimization iteration.
+#         Also set the number of optimization loops for the robot and human.
+#         Arguments:
+#             - init_plan_scheme: string specifying the plan initialization scheme.
+#         """
+#         assert init_plan_scheme in constants.INIT_PLAN_SCHEMES_OPTIONS
+#         self.get_init_plan_r_fn = eval('self.get_init_plan_r_fn_' + init_plan_scheme)
+#         self.get_init_plan_h_fn = eval('self.get_init_plan_h_fn_' + init_plan_scheme)
+#         self.num_optimizations_r = constants.INIT_PLAN_SCHEME_TO_NUM_OPTS_R[init_plan_scheme]
+#         self.num_optimizations_h = constants.INIT_PLAN_SCHEME_TO_NUM_OPTS_H[init_plan_scheme]
+#
+#     def get_init_plan_r_fn_maintain_speed_lsr_and_prev_opt(self, iter):
+#         # TODO: comment this
+#         v = self.traj_r.x0[3]
+#         acc = constants.FRICTION * v ** 2
+#         init_plan_r_fn_list = [
+#             lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][0], acc] for _ in range(self.traj_r.horizon)),
+#             lambda: np.hstack([0., acc] for _ in range(self.traj_r.horizon)),
+#             lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][1], acc] for _ in range(self.traj_r.horizon)),
+#             lambda: np.hstack([v.get_value() for v in self.plan_r[:-1]] + [self.traj_r.default_control])
+#         ]
+#         return init_plan_r_fn_list[iter]
+#
+#     def get_init_plan_h_fn_maintain_speed_lsr_and_prev_opt(self, iter):
+#         # TODO: comment this
+#         v = self.traj_h.x0[3]
+#         acc = constants.FRICTION * v ** 2
+#         init_plan_h_fn_list = [
+#             lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][0], acc] for _ in range(self.traj_h.horizon)),
+#             lambda: np.hstack([0., acc] for _ in range(self.traj_h.horizon)),
+#             lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][1], acc] for _ in range(self.traj_h.horizon)),
+#             lambda: np.hstack([v.get_value() for v in self.plan_h[:-1]] + [self.traj_h.default_control])
+#         ]
+#         return init_plan_h_fn_list[iter]
+#
+#     def get_init_plan_r_fn_maintain_speed_lsr(self, iter):
+#         # TODO: comment this
+#         v = self.traj_r.x0[3]
+#         acc = constants.FRICTION * v ** 2
+#         init_plan_r_fn_list = [
+#             lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][0], acc] for _ in range(self.traj_r.horizon)),
+#             lambda: np.hstack([0., acc] for _ in range(self.traj_r.horizon)),
+#             lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][1], acc] for _ in range(self.traj_r.horizon))
+#         ]
+#         return init_plan_r_fn_list[iter]
+#
+#     def get_init_plan_h_fn_maintain_speed_lsr(self, iter):
+#         # TODO: comment this
+#         v = self.traj_h.x0[3]
+#         acc = constants.FRICTION * v ** 2
+#         init_plan_h_fn_list = [
+#             lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][0], acc] for _ in range(self.traj_h.horizon)),
+#             lambda: np.hstack([0., acc] for _ in range(self.traj_h.horizon)),
+#             lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][1], acc] for _ in range(self.traj_h.horizon))
+#         ]
+#         return init_plan_h_fn_list[iter]
+#
+#     def get_init_plan_r_fn_lsr(self, iter):
+#         # TODO: comment this
+#         init_plan_r_fn_list = [
+#             lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][0], 0.] for _ in range(self.traj_r.horizon)),
+#             lambda: np.hstack([0., 0.] for _ in range(self.traj_r.horizon)),
+#             lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][1], 0.] for _ in range(self.traj_r.horizon))
+#         ]
+#         return init_plan_r_fn_list[iter]
+#
+#     def get_init_plan_h_fn_lsr(self, iter):
+#         # TODO: comment this
+#         init_plan_h_fn_list = [
+#             lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][0], 0.] for _ in range(self.traj_h.horizon)),
+#             lambda: np.hstack([0., 0.] for _ in range(self.traj_h.horizon)),
+#             lambda: np.hstack([constants.CAR_CONTROL_BOUNDS[0][1], 0.] for _ in range(self.traj_h.horizon))
+#         ]
+#         return init_plan_h_fn_list[iter]
+#
+#     def get_init_plan_r_fn_max_speed_prev_steer(self, iter):
+#         # TODO: comment this
+#         return lambda: np.hstack([[v.get_value()[0], constants.CAR_CONTROL_BOUNDS[1][1]] for v in self.plan_r[:-1]] + [
+#             self.traj_r.default_control[0], constants.CAR_CONTROL_BOUNDS[1][1]])
+#
+#     def get_init_plan_h_fn_max_speed_prev_steer(self, iter):
+#         # TODO: comment this
+#         return lambda: np.hstack([[v.get_value()[0], constants.CAR_CONTROL_BOUNDS[1][1]] for v in self.plan_h[:-1]] + [
+#             self.traj_h.default_control[0], constants.CAR_CONTROL_BOUNDS[1][1]])
+#
+#     def get_init_plan_r_fn_maintain_speed_prev_steer(self, iter):
+#         # TODO: comment this
+#         v = self.traj_r.x0[3]
+#         acc = constants.FRICTION * v ** 2
+#         return lambda: np.hstack(
+#             [[v.get_value()[0], acc] for v in self.plan_r[:-1]] + [self.traj_r.default_control[0], acc])
+#
+#     def get_init_plan_h_fn_maintain_speed_prev_steer(self, iter):
+#         # TODO: comment this
+#         v = self.traj_h.x0[3]
+#         acc = constants.FRICTION * v ** 2
+#         return lambda: np.hstack(
+#             [[v.get_value()[0], acc] for v in self.plan_h[:-1]] + [self.traj_h.default_control[0], acc])
+#
+#     def get_init_plan_r_fn_prev_opt(self, iter):
+#         # TODO: comment this
+#         """Initialize the robot plan using the default way."""
+#         return lambda: np.hstack([v.get_value() for v in self.plan_r[:-1]] + [self.traj_r.default_control])
+#
+#     def get_init_plan_h_fn_prev_opt(self, iter):
+#         # TODO: comment this
+#         """Initialize the human's plan using the default way."""
+#         return lambda: np.hstack([v.get_value() for v in self.plan_h[:-1]] + [self.traj_h.default_control])
+#
+#     def init_grads(self):
+#         """Initialize the gradients based on the rewards.
+#         Precondition: the rewards (self.r_h and self.r_r) have already been
+#         initialized.
+#         """
+#         # gradient of human reward wrt human controls
+#         self.dr_h = grad(self.r_h, self.plan_h)
+#         # negative human reward and its derivative
+#         self.func1 = th.function([], [-self.r_h, -self.dr_h])
+#
+#         def r_h_and_dr_h(plan_h_0):
+#             """Evaluate negative human reward and its derivative.
+#             - plan_h_0: initial value for human plan."""
+#             start_time = time.time()
+#             # set plan_h to the given (initial) plan_h_0
+#             for v, (a, b) in zip(self.plan_h, self.control_indices_h):
+#                 v.set_value(plan_h_0[a:b])
+#             # do any necessary updates based on the current plan
+#             # (this is necessary for the HierarchicalMaximizer, not the Nested Maximizer)
+#             self.update_with_curr_plan_fn()
+#             func1_val = self.func1()  # negative human reward and its derivative
+#             end_time = time.time()
+#             time_profile.inner_loop_time_profile.update(start_time, end_time)
+#             return func1_val
+#
+#         self.r_h_and_dr_h = r_h_and_dr_h
+#
+#         # ------------------------------------------------------------------------------------------
+#         # Robot's reward and its derivative.
+#
+#         # ------------------------------------------------------------------------------------------
+#         if self.use_second_order:
+#             # OPTION 1: Full derivative computation with Hessian inversion.
+#             # SLOW, DEPRECATED
+#             # jacobian of (d human reward / d robot actions) w.r.t. human actions
+#             J = jacobian(grad(self.r_h, self.plan_r), self.plan_h)
+#             # hessian of human reward w.r.t. human actions
+#             H = hessian(self.r_h, self.plan_h)
+#             # d robot reward / d human actions
+#             g = grad(self.r_r, self.plan_h)
+#             # Below is the most time-consuming step (the solve(H,g))
+#             self.dr_r = -tt.dot(J, ts.solve(H, g)) + grad(self.r_r, self.plan_r)
+#         # ------------------------------------------------------------------------------------------
+#         else:
+#             # OPTION 2: Partial derivative computation. FAST
+#             # (Only direct effect of robot action given current human action)
+#             # Below is the simplified derivative that neglects the second-order
+#             # effect through human (and therefore avoids the heavy Hessian
+#             # inversion)
+#             self.dr_r = grad(self.r_r, self.plan_r)
+#         # ------------------------------------------------------------------------------------------
+#
+#         # negative robot reward and its derivative
+#         self.func2 = th.function([], [-self.r_r, -self.dr_r])
+#
+#         def r_r_and_dr_r(plan_r_0):
+#             """Get optimal human response, and return negative robot reward
+#             and its derivative.
+#             - plan_r_0: initial value for robot plan."""
+#             # set self.plan_r to the given (initial) plan_r_0
+#             for v, (a, b) in zip(self.plan_r, self.control_indices_r):
+#                 v.set_value(plan_r_0[a:b])
+#             self.maximize_inner()  # get optimal human response
+#             start_time = time.time()
+#             func2_val = self.func2()  # negative robot reward and its derivative
+#             end_time = time.time()
+#             time_profile.func2_time_profile.update(start_time, end_time)
+#             return func2_val
+#
+#         self.r_r_and_dr_r = r_r_and_dr_r
+#
+#     def maximize_inner(self, bounds={}, maxiter=config.NESTEDMAX_MAXITER_INNER):
+#         """Get optimal human response (controls).
+#         Arguments:
+#         - bounds: control bounds for the human.
+#         - maxiter: maximum number of iterations.
+#         """
+#         start_time = time.time()
+#
+#         bounds = constants.HIERARCHICAL_HUMAN_CONTROL_BOUNDS
+#         if not isinstance(bounds, dict):  # convert bounds to dictionary
+#             bounds = {v: bounds for v in self.plan_h}
+#         B = []  # list of bounds for each control in the plan
+#         for v, (a, b) in zip(self.plan_h, self.control_indices_h):
+#             if v in bounds:
+#                 B += bounds[v]
+#             else:
+#                 B += [(None, None)] * (b - a)
+#
+#         # optimal human response, value, etc.
+#         opt_plan_h = np.hstack((-2*0.13/3, 0) for _ in range(self.traj_h.horizon))
+#
+#         for v, (a, b) in zip(self.plan_h, self.control_indices_h):
+#             v.set_value(opt_plan_h[a:b])
+#
+#         # do any necessary updates based on the current plan
+#         # (this is necessary for the HierarchicalMaximizer, not the Nested Maximizer)
+#         self.update_with_curr_plan_fn()
+#
+#         # increment the counter for the number of iterations of maximizer_inner
+#         self.maximizer_inner_iters += 1
+#         end_time = time.time()
+#         time_profile.maximize_inner_time_profile.update(start_time, end_time)
+#         return opt_plan_h
+#
+#     def maximize(self, bounds={}, bounds_inner={},
+#                  maxiter_inner=config.NESTEDMAX_MAXITER_INNER):
+#         # Get optimal robot plan (controls) and human response using nested
+#         # optimization.
+#         start_time = time.time()
+#         if not isinstance(bounds, dict):  # convert bounds to dictionary
+#             bounds = {v: bounds for v in self.plan_r}
+#         B = []  # list of bounds for each control in the plan
+#         for v, (a, b) in zip(self.plan_r, self.control_indices_r):
+#             if v in bounds:
+#                 B += bounds[v]
+#             else:
+#                 B += [(None, None)] * (b - a)
+#
+#         opt_r_list = []  # list of optimization results
+#         for i in range(self.num_optimizations_r):
+#             # TODO: can we replace the .get_value() approach with using the numpy
+#             # version because at this point the Theano and numpy plans are the same?
+#             # plan_r_0 = np.hstack(self.traj_r.u) # initial robot plan (numpy version)
+#             plan_r_0 = self.get_init_plan_r_fn(i)()  # initialize the robot's plan
+#             # plan_r_0 = np.hstack([v.get_value() for v in self.plan_r])
+#             for j in range(self.num_optimizations_h):
+#                 # debugging
+#                 # print('robot optimization iter:', i)
+#                 # print('human optimization iter:', j)
+#
+#                 # reset number of maximizer_inner iterations
+#                 self.maximizer_inner_iters = 0
+#                 # get the human's plan initialization function
+#                 self.init_plan_h = self.get_init_plan_h_fn(j)
+#                 # optimal robot control, value, etc.
+#                 opt_r = opt_timeup.fmin_l_bfgs_b_timeup(self.r_r_and_dr_r,
+#                                                         x0=plan_r_0, bounds=B, t0=start_time, timeup=self.timeup)
+#                 opt_r_list.append(opt_r)
+#                 # opt_plan_r = opt_r[0] # optimal robot control
+#
+#         # get the best plan based on its value
+#         best_opt_r = min(opt_r_list, key=lambda opt: opt[1])
+#         opt_plan_r = best_opt_r[0]  # optimal robot control
+#
+#         # debugging
+#         # print('opt_r_list:', opt_r_list)
+#         # print('best_opt_r:', best_opt_r)
+#
+#         # TODO: remove?
+#         for v, (a, b) in zip(self.plan_r, self.control_indices_r):
+#             v.set_value(opt_plan_r[a:b])
+#
+#         # optimal human response, value, etc. to optimal robot control
+#         opt_h = self.maximize_inner(bounds=bounds_inner, maxiter=maxiter_inner)
+#
+#         print([x.get_value() for x in self.plan_r])
+#         print([x.get_value() for x in self.plan_h])
+#         # time profile of HierarchicalMaximizer
+#         maximize_end_time = time.time()
+#         time_profile.maximizer_time_profile.update(start_time, maximize_end_time)
+#         return opt_r[0], opt_h
 
 class HierarchicalMaximizer(NestedMaximizer):
     # The following class maximizes the hierarchical game between the robot (leader)
@@ -703,7 +1301,16 @@ class HierarchicalMaximizer(NestedMaximizer):
         end_time = time.time()
         time_profile.update_corners_time_profile.update(start_time, end_time)
         return cell_corners_new, vR_corners_new, vH_corners_new
-
+class ILQRMaximizer():
+    def __init__(self, r_h, traj_h, r_r, traj, dyn):
+        self.r_h = r_h
+        self.traj_h = traj_h
+        self.r_r = r_r
+        self.traj = traj
+        self.dyn = dyn
+    def maximize(self, bounds={}):
+        #return unicycle.run()
+        return unicycle.run(self.traj.x0, None, None, self.dyn, self.r_r, self.r_h)
 
 class PredictReactMaximizer(NestedMaximizer):
     def init_grads(self):

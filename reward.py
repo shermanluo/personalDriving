@@ -3,6 +3,7 @@ import sys
 
 import numpy as np
 import theano.tensor as tt
+import torch
 
 import config
 import constants
@@ -18,7 +19,8 @@ class Reward(object):
             speed=30.*constants.METERS_TO_VIS, 
             fine_behind=config.FINE_BEHIND_R, 
             fence_sigmoid=config.FENCE_SIGMOID, 
-            car_control_bounds=constants.CAR_CONTROL_BOUNDS):
+            car_control_bounds=constants.CAR_CONTROL_BOUNDS,
+            is_human=False):
         """
         Define reward functions (tactical, and strategic value and
         hierarchical reward if applicable) given the input paremeters.
@@ -68,14 +70,18 @@ class Reward(object):
         self.car_control_bounds = car_control_bounds
         self.steering_bound = self.car_control_bounds[0][1]
         self.acceleration_bound = self.car_control_bounds[1][1]
-
+        self.is_human = is_human
         # reward definitions
+        #pdb.set_trace()
         self.state_reward_np = self.get_state_reward(fw=np)
         self.state_reward_th = self.get_state_reward(fw=tt)
+        self.state_reward_torch = self.get_state_reward(fw=torch)
         self.control_reward_np = self.get_control_reward(fw=np)
         self.control_reward_th = self.get_control_reward(fw=tt)
+        self.control_reward_torch = self.get_control_reward(fw=torch)
         self.reward_np = self.state_reward_np + self.control_reward_np
         self.reward_th = self.state_reward_th + self.control_reward_th
+        self.reward_torch = self.state_reward_torch + self.control_reward_torch
 
     def get_config(self):
         """Return JSON object describing the parameters of this reward."""
@@ -102,7 +108,11 @@ class Reward(object):
         rewards = {}
         state_r = feature.feature(lambda t, x, u: 0.0)
         for i, (lane, w_lane) in enumerate(zip(self.world.lanes, self.w_lanes)):
-            rewards['lane gaussian ' + str(i)] = w_lane * lane.gaussian(fw=fw)
+            if self.is_human:
+                lane_gaussian_std = constants.LANE_REWARD_STDEV_h
+            else:
+                lane_gaussian_std = constants.LANE_REWARD_STDEV_r
+            rewards['lane gaussian ' + str(i)] = w_lane * lane.gaussian(fw=fw, stdev=lane_gaussian_std)
         for i, (fence, w_fence) in enumerate(zip(self.world.fences, self.w_fences)):
             if self.fence_sigmoid: # sigmoid fence reward
                 rewards['fence sigmoid ' + str(i)] = w_fence * fence.sigmoid(fw=fw)
@@ -128,7 +138,11 @@ class Reward(object):
         """Compute the state reward."""
         state_r = feature.feature(lambda t, x, u: 0.0)
         for lane, w_lane in zip(self.world.lanes, self.w_lanes):
-            state_r += w_lane * lane.gaussian(fw=fw)
+            if self.is_human:
+                lane_gaussian_std = constants.LANE_REWARD_STDEV_h
+            else:
+                lane_gaussian_std = constants.LANE_REWARD_STDEV_r
+            state_r += w_lane * lane.gaussian(fw=fw, stdev=lane_gaussian_std)
         for fence, w_fence in zip(self.world.fences, self.w_fences):
             if self.fence_sigmoid: # sigmoid fence reward
                 state_r += w_fence * fence.sigmoid(fw=fw)
@@ -138,11 +152,11 @@ class Reward(object):
             state_r += self.w_speed * feature.speed(self.speed)
         for other_traj, w_other_traj in zip(self.other_car_trajs, self.w_other_car_trajs):
             if self.fine_behind:
-                state_r += (w_other_traj * 
+                state_r += (w_other_traj *
                     other_traj.gaussian(fw, length=.14, width=.03))
             else:
-                state_r += (w_other_traj * 
-                    other_traj.gaussian(fw, length=.14, width=.03) + 
+                state_r += (w_other_traj *
+                    other_traj.gaussian(fw, length=.14, width=.03) +
                     other_traj.not_behind(fw, self.w_behind))
         for other_truck_traj, w_other_truck_traj in zip(self.other_truck_trajs, self.w_other_truck_trajs):
             state_r += (w_other_truck_traj *
@@ -153,9 +167,8 @@ class Reward(object):
         """Compute the control reward."""
         control_r = (self.w_control * feature.control())
         bounded_control_r = (self.w_bounded_control *
-            feature.bounded_control(fw, self.car_control_bounds))
+           feature.bounded_control(fw, self.car_control_bounds))
         return control_r + bounded_control_r
-
 
 def simple_reward(world, other_car_trajs, speed):
     w_lanes = [1.0 for _ in world.lanes]

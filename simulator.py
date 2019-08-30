@@ -8,6 +8,7 @@ import constants
 from car import HierarchicalCar
 import topic_program
 import utils
+import theano
 
 class Simulator(object):
     # Simulate the world by getting the car controls, applying them to move the
@@ -24,6 +25,7 @@ class Simulator(object):
         self.time = 0 # simulation time
         self.feed_u = feed_u
         self.interaction_data = interaction_data
+        self.rewards = [0.0, 0.0, 0.0]
 
     def simulate(self):
         """Get the car controls, move the cars, update time."""
@@ -97,11 +99,14 @@ class Simulator(object):
         if index >= len(self.interaction_data[0]):
             print 'Finished interaction data. Pausing.'
             topic_program.paused = True
+            print("Robot Rewards, Robot_Human Rewards, Human_Human Rewards", self.rewards)
             return
         else:
             for car, car_interaction_data in zip(self.world.cars, self.interaction_data):
                 car.traj.x0 = car_interaction_data[index][1] # TODO: make this depend on the time stored in the interaction data (use bisect)
                 car.traj.u = car_interaction_data[index][2]
+
+
                 if hasattr(car, 'traj_h'):
                     car.traj_h.u = car_interaction_data[index][3]
 
@@ -110,9 +115,21 @@ class Simulator(object):
                 print('{0} y: {1}'.format(car.name, car.traj.x0[1]))
                 # print('{0} heading: {1}'.format(car.name, car.traj.x0[2]))
                 # print('{0} speed: {1}'.format(car.name, car.traj.x0[3]))
-                
             # Update position of the robot car's belief of the human trajectory
             # (must be done after updating the human's actual trajectory)
             for car in self.world.cars:
                 if hasattr(car, 'human') and hasattr(car, 'traj_h'):
                     car.traj_h.x0 = car.human.traj.x0
+            #
+            # for car in self.world.cars:
+            #     if car is self.world.main_human_car:
+            #         h_h = car.reward.reward_th(0, car.traj.x0, car.traj.u[0])
+            #         self.rewards[2] += theano.function([], [h_h])()[0]
+            #     if car is self.world.main_robot_car:
+            #         r_r = car.reward.reward_th(0, car.traj.x0, car.traj.u[0])
+            #         self.rewards[0] += theano.function([], [r_r])()[0]
+            #         # r_h = car.reward_h.reward_th(0, car.traj_h.x0, car.traj_h.u[0])
+            #         # self.rewards[1] += theano.function([], [r_h])()[0]
+            # print(self.rewards)
+
+

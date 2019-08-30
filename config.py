@@ -68,7 +68,7 @@ W_SPEED = -10.0 # keep at goal speed
 W_OTHER_CAR_TRAJS = -60.0 # stay away from other cars
 W_OTHER_TRUCK_TRAJS = -60.0 # stay away from other trucks
 W_BEHIND = -3.0 # don't be behind the other car
-W_CONTROL = -0.1 # cost for control
+W_CONTROL = -0.1 / 100000000 # cost for control
 W_BOUNDED_CONTROL = -100.0 # don't violate control bounds
 # reward settings
 FINE_BEHIND_R = False # if True, robot car is not penalized for being behind the human car

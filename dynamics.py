@@ -1,5 +1,6 @@
 import numpy as np
 import theano.tensor as tt
+import torch
 
 import constants
 
@@ -10,7 +11,7 @@ class Dynamics(object):
         # f: dynamics derivative function
         # fw: computational framework (numpy or Theano)
         # dt: timestep
-        assert(fw == np or fw == tt) # Framework must be either numpy or theano.tensor
+        assert(fw == np or fw == tt or fw == torch) # Framework must be either numpy or theano.tensor
         self.nx = nx
         self.nu = nu
         self.dt = dt
@@ -19,6 +20,8 @@ class Dynamics(object):
             f_fw = lambda x, u: np.array(f(x, u))
         elif fw == tt:
             f_fw = lambda x, u: tt.stacklists(f(x, u))
+        elif fw == torch:
+            f_fw = lambda x, u: torch.stack(f(x, u))
         
         if dt is not None:
             self.f = lambda x, u: x + dt * f_fw(x, u)

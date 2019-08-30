@@ -48,7 +48,7 @@ class TwoCarPlanner(object):
 		"""Generate new plans for robot and human, set them in the 
 								corresponding trajectories, and return the robot plan."""
 		opt_r, opt_h = self.optimizer.maximize(bounds=self.bounds) # 1-D
-		plan_r, plan_h = opt_r[0], opt_h[0]
+		plan_r, plan_h = opt_r, opt_h
 		# Update optimal control in trajectories
 		self.traj_r.u = plan_r # numpy robot plan
 		self.traj_r.u_th = plan_r # Theano robot plan

@@ -8,6 +8,7 @@ import constants
 import feature
 import lane
 import utils
+import torch
 
 
 class Trajectory(object):
@@ -34,6 +35,14 @@ class Trajectory(object):
         self._u_th = [utils.th_vector(self.dyn_np.nu) for t in range(horizon)]
         # theano version of self.x
         self._x_th = self.get_x(self._x0_th, self._u_th, self.dyn_th)
+
+        ### Torch state, plan, dynamics
+        self.dyn_torch = dyn(torch, dt=dt)  # Theano dynamics function
+        self._x0_torch = torch.tensor(x0, requires_grad=True)  # theano version of self.x
+        # theano version of self.u
+        self._u_torch = [torch.zeros(self.dyn_np.nu) for t in range(horizon)]
+        # theano version of self.x
+        self._x_torch = self.get_x(self._x0_torch, self._u_torch, self.dyn_torch)
         
         # Start and stop indices of each control in the plan.
         self.control_indices = [a.shape[0] for a in self._u]
@@ -131,8 +140,30 @@ class Trajectory(object):
         for i in range(len(value_format)):
             self._u_th[i].set_value(value_format[i])
 
+    ### Torch properties
+    @property
+    def x0_torch(self):
+        return self._x0_torch
+    @x0_torch.setter
+    def x0_torch(self, value):
+        assert (len(value) == len(self._x0))
+        self._x0_torch = torch.tensor(value)
+    @property
+    def x_torch(self):
+        return self._x_torch
+
+    @property
+    def u_torch(self):
+        return self._u_torch
+
+    @u_torch.setter
+    def u_torch(self, value):
+        value_format = self.format_u(value)
+        for i in range(len(value_format)):
+            self._u_torch[i] = torch.tensor(value_format[i])
+
     def x_from_x0(self, fw):
-        assert(fw == np or fw == tt)
+        assert(fw == np or fw == tt or fw == torch)
         if fw == np:
             x = [self.x0]
             x.extend(self.x[:-1])
@@ -141,10 +172,15 @@ class Trajectory(object):
             x = [self.x0_th]
             x.extend(self.x_th[:-1])
             return x
+        elif fw == torch:
+            x = [self.x0_torch]
+            x.extend(self.x_torch[:-1])
+            return x
+
 
     def gaussian(self, fw, length=.07, width=.03):
         """Gaussian-shaped cost around trajectory."""
-        assert(fw == np or fw == tt)
+        assert(fw == np or fw == tt or fw == torch)
         # Make the reward function applied to the state trajectory
         # by calling self.x_from_x0 and using  the computational framework fw.
         # Note: self.x_from_x0 is a function instead of a value so that the 
@@ -168,7 +204,7 @@ class Trajectory(object):
         #  - fw: computational fw
         #  - length: constant corresponding to length of car
         #  - width: constant corresponding to width of car
-        assert(fw == np or fw == tt)
+        assert(fw == np or fw == tt or fw == torch)
         d = (this_x0[0]-other_x0[0], this_x0[1]-other_x0[1])
         theta = this_x0[2]
         dl = fw.cos(theta)*d[0]+fw.sin(theta)*d[1]
@@ -177,7 +213,7 @@ class Trajectory(object):
 
     def gaussian(self, fw, length=.07, width=.03):
         """Gaussian-shaped cost around trajectory."""
-        assert(fw == np or fw == tt)
+        assert(fw == np or fw == tt or fw==torch)
         # Make the reward function applied to the state trajectory
         # by calling self.x_from_x0 and using  the computational framework fw.
         # Note: self.x_from_x0 is a function instead of a value so that the 
@@ -192,7 +228,7 @@ class Trajectory(object):
 
     def sigmoid(self, fw):
         """Sigmoid-shaped cost around trajectory."""
-        assert(fw == np or fw == tt)
+        assert(fw == np or fw == tt or fw == torch)
         # Make the reward function applied to the state trajectory
         # by calling self.x_from_x0 and using  the computational framework fw.
         # Note: self.x_from_x0 is a function instead of a value so that the 
@@ -214,7 +250,7 @@ class Trajectory(object):
         - other_x0: current state of other car
         - fw: computational framework (numpy or theano.tensor)
         """
-        assert(fw == np or fw == tt)
+        assert(fw == np or fw == tt or fw == torch)
         dx = this_x0[0] - other_x0[0]
         dy = this_x0[1] - other_x0[1]
         theta = this_x0[2]
@@ -232,7 +268,7 @@ class Trajectory(object):
     
     def not_behind(self, fw, weight):
         # Not behind (another car) penalty represeneted as sigmoids.
-        assert(fw == np or fw == tt)
+        assert(fw == np or fw == tt or fw == torch)
         # Make the reward function applied to the state trajectory
         # by calling self.x_from_x0 and using  the computational framework fw.
         # Note: self.x_from_x0 is a function instead of a value so that the 
@@ -240,14 +276,16 @@ class Trajectory(object):
         # Define inverse operation depending on framework (Theano or otherwise)
         if fw == np:
             inv = lambda x: 1.0 / x
+        elif fw == torch:
+            inv = torch.reciprocal
         elif fw == tt:
             inv = tt.inv
         @feature.feature
         def f(t, x, u):
             # Reward evaluated at time t (t=0 is the current state) when the
             # other car is at state x with plan u.
-            return Trajectory.r_not_behind(self.x_from_x0(fw)[t], x, weight, fw, 
-                    inv)
+            #pdb.set_trace()
+            return Trajectory.r_not_behind(self.x_from_x0(fw)[t], x, weight, fw, inv)
         return f
 
     @staticmethod
@@ -259,7 +297,7 @@ class Trajectory(object):
         #  - weight: constant multiplier
         #  - fw: computational framework
         #  - inv: inversion operation, depending on numpy or Theano
-        assert(fw == np or fw == tt)
+        assert(fw == np or fw == tt or fw == torch)
         x_rel = other_x0[0]-this_x0[0]
         y_rel = other_x0[1]-this_x0[1]
         term1 = inv(1+fw.exp(-constants.BEHIND_REWARD_SLOPE * (x_rel+0.13/2)))
@@ -276,14 +314,16 @@ class Trajectory(object):
         # This minkowski sum is approximate in the sense that both vehicles 
         # are assumed to be in the y-direction (fixed theta).
         # Height is in the y-direction while width is in the x-direction.
-        assert(fw == np or fw == tt)
+        assert(fw == np or fw == tt or fw == torch)
         def make_f(x_func, fw):
             # Make the reward function applied to the given state trajectory
             # x_func() and the computational framework fw.
             if fw == np:
                 inv = lambda x: 1.0 / x
-            elif fw == t:
+            elif fw == tt:
                 inv = tt.inv
+            elif fw == torch:
+                inv = torch.reciprocal
             @feature.feature
             def f(t, x, u):
                 # Reward evaluated at time t (t=0 is the current state) when the
@@ -307,14 +347,16 @@ class Trajectory(object):
     def minkowski_sum_1d(self, fw, h=1/0.025, own_length=.14, other_length=.14):
         # This minkowski sum assumes what minkowski_sum_2d assumes plus that the 
         # vehicles are aligned in the y-direction.
-        assert(fw == np or fw == tt)
+        assert(fw == np or fw == tt or fw == torch)
         def make_f(x_func, fw):
             # Make the reward function applied to the given state trajectory
             # x_func() and the computational framework fw.
             if fw == np:
                 inv = lambda x: 1.0 / x
-            elif fw == t:
+            elif fw == tt:
                 inv = tt.inv
+            elif fw == torch:
+                inv = torch.reciprocal
             @feature.feature
             def f(t, x, u):
                 # Reward evaluated at time t (t=0 is the current state) when the
@@ -356,6 +398,8 @@ class Trajectory(object):
         # Elis: added to make trucks stay inside its DSG domain.
         if fw == tt:
             inv = tt.inv
+        elif fw == th:
+            inv = torch.reciprocal
         else:
             inv = lambda x: 1.0 / x 
         @feature.feature
@@ -400,7 +444,7 @@ class Trajectory(object):
         # at time t. Prepend x0 to self.x{_th}, don't use self.x{_th}[-1] for the
         # tactical reward.
         
-        assert(fw == np or fw == tt)
+        assert(fw == np or fw == tt or fw == torch)
         if fw == np:
             # x = self.x
             x = [self.x0]
@@ -411,14 +455,20 @@ class Trajectory(object):
             x = [self.x0_th]
             x.extend(self.x_th[:-1])
             return sum([reward(t, x[t], self.u_th[t]) for t in range(self.horizon)])
+        elif fw == torch:
+            # x = self.x_th
+            x = [self.x0_torch]
+            x.extend(self.x_torch[:-1])
+            return sum([reward(t, x[t], self.u_torch[t]) for t in range(self.horizon)])
         
     def cum_reward(self, reward, fw):
         # The first cumulative reward term. Note that use of the current state 
         # (x0) and the first control (u[0]) (see the important note in the 
         # reward function above.
-        assert(fw == np or fw == tt)
+        assert(fw == np or fw == tt or fw == torch)
         if fw == np:
             return reward(0, self.x0, self.u[0])
-        elif fw == t:
+        elif fw == tt:
             return reward(0, self.x0_th, self.u_th[0])
-        
+        elif fw == torch:
+            return reward(0, self.x0_torch, self.u_torch[0])

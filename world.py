@@ -107,7 +107,7 @@ def get_initial_states(scenario):
     elif scenario == 'hard_merging':
         x0_r = np.array([constants.LEFT_LANE_CENTER + constants.LANE_WIDTH_VIS, 
             0.0, np.pi/2., initial_speed_r])
-        x0_h = np.array([0.0, 0.3, np.pi/2., initial_speed_h])
+        x0_h = np.array([0.0, 0.0, np.pi/2., initial_speed_h])
     elif scenario == 'truck_cut_in_human_in_front':
         x0_r = np.array([0.0, 0.0, np.pi/2., config.INITIAL_SPEED_R])
         x0_h = np.array([0.0, 0.7, np.pi/2., initial_speed_h])
@@ -177,6 +177,7 @@ def world_test(initial_states='far_overtaking',
         speed=0.5)
 
     # initialize planners
+    print("number of robot cars", len(world.robot_cars))
     for c in world.robot_cars:
         if hasattr(c, 'init_planner'):
             print 'Initializing planner for ' + c.name
@@ -275,6 +276,18 @@ def world_highway(initial_states='overtaking',
             constants.CAR_CONTROL_BOUNDS, horizon=config.HORIZON, 
             color=constants.COLOR_R, name=constants.NAME_R,
             use_second_order=config.USE_SECOND_ORDER)
+    elif config.ROBOT_CAR == 'car.IteratedBestResponseCar':
+        robot_car = car.IteratedBestResponseCar(x0_r, constants.DT, dyn,
+        constants.CAR_CONTROL_BOUNDS, horizon=config.HORIZON,
+        color=constants.COLOR_R, name=constants.NAME_R)
+    elif config.ROBOT_CAR == 'car.IteratedBestResponseCar':
+        robot_car = car.ILQRCar(x0_r, constants.DT, dyn,
+        constants.CAR_CONTROL_BOUNDS, horizon=config.HORIZON,
+        color=constants.COLOR_R, name=constants.NAME_R)
+    elif config.ROBOT_CAR == 'car.ILQRCar':
+        robot_car = car.ILQRCar(x0_r, constants.DT, dyn,
+        constants.CAR_CONTROL_BOUNDS, horizon=config.HORIZON,
+        color=constants.COLOR_R, name=constants.NAME_R)
     else:
         print('"{0}" is currently an unsupported robot car type'.format(config.ROBOT_CAR))
         sys.exit()
@@ -314,7 +327,8 @@ def world_highway(initial_states='overtaking',
             w_control=w_control,
             w_bounded_control=w_bounded_control_h,
             speed=ref_speed_h,
-            fine_behind=fine_behind_h)#,
+            fine_behind=fine_behind_h,
+            is_human=True)#,
             # strategic_value_mat_name=mat_name, robot_car=robot_car,
             # proj_np=proj_np, proj_th=proj_th)
     robot_r_r = reward.Reward(world, [robot_car.traj_h],
@@ -322,7 +336,8 @@ def world_highway(initial_states='overtaking',
             w_control=w_control,
             w_bounded_control=w_bounded_control_r,
             speed=ref_speed_r,
-            fine_behind=fine_behind_r)#,
+            fine_behind=fine_behind_r,
+            is_human=False)#,
             # strategic_value_mat_name=mat_name, robot_car=robot_car,
             # proj_np=proj_np, proj_th=proj_th)
     robot_car.reward = robot_r_r
@@ -359,7 +374,8 @@ def world_highway(initial_states='overtaking',
             w_control=w_control,
             w_bounded_control=w_bounded_control_h,
             speed=ref_speed_h,
-            fine_behind=fine_behind_h)#,
+            fine_behind=fine_behind_h,
+            is_human=True)#,
             # strategic_value_mat_name=mat_name, robot_car=robot_car,
             # proj_np=proj_np, proj_th=proj_th)
     human_r_r = reward.Reward(world, [human_car.traj],
@@ -367,7 +383,8 @@ def world_highway(initial_states='overtaking',
             w_control=w_control,
             w_bounded_control=w_bounded_control_r,
             speed=ref_speed_r,
-            fine_behind=fine_behind_r)#,
+            fine_behind=fine_behind_r,
+            is_human=False)#,
             # strategic_value_mat_name=mat_name, robot_car=robot_car,
             # proj_np=proj_np, proj_th=proj_th)
     human_car.reward = human_r_h
@@ -401,6 +418,7 @@ def world_highway(initial_states='overtaking',
     pp.pprint(world.get_config())
 
     # initialize planners
+    print("number of robot cars", len(world.robot_cars))
     if init_planner:
         print('Initializing planners.')
         for c in world.cars:
@@ -481,6 +499,10 @@ def world_highway_truck_cut_in(initial_states='truck_cut_in_far_overtaking',
     elif config.ROBOT_CAR == 'car.PredictReactCar':
         robot_car = car.PredictReactCar(x0_r, constants.DT, dyn, 
             constants.CAR_CONTROL_BOUNDS, horizon=config.HORIZON, 
+            color=constants.COLOR_R, name=constants.NAME_R)
+    elif config.ROBOT_CAR == 'car.IteratedBestResponseCar':
+        robot_car = car.IteratedBestResponseCar(x0_r, constants.DT, dyn,
+            constants.CAR_CONTROL_BOUNDS, horizon=config.HORIZON,
             color=constants.COLOR_R, name=constants.NAME_R)
     else:
         print('"{0}" is currently an unsupported robot car type'.format(config.ROBOT_CAR))

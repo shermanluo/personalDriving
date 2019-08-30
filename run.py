@@ -159,7 +159,7 @@ if __name__ == '__main__':
     else:
         this_world = getattr(world, args.world)(initial_states=args.init_state, 
             init_planner=init_planner)
-
+    this_world.simulator.iters = args.iters
     ### Visualizer setup
     
     # Set max number of iterations for situations when it's necessary

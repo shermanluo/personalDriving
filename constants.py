@@ -48,9 +48,9 @@ COLOR_R = 'yellow'
 COLOR_TRUCK = 'truck'
 WHEELBASE = 3
 # Options for the type of the human car
-HUMAN_CAR_OPTIONS = ['SimpleOptimizerCar', 'FollowerCar', 'UserControlledCar', 'MaintainSpeedCar']
+HUMAN_CAR_OPTIONS = ['SimpleOptimizerCar', 'FollowerCar', 'UserControlledCar', 'MaintainSpeedCar', 'BadOptimizerCar']
 # Options for the type of the robot car
-ROBOT_CAR_OPTIONS = ['HierarchicalCar', 'NestedCar', 'SimpleOptimizerCar', 'PredictReactCar', 'PredictReactHierarchicalCar']
+ROBOT_CAR_OPTIONS = ['HierarchicalCar', 'NestedCar', 'SimpleOptimizerCar', 'PredictReactCar', 'PredictReactHierarchicalCar', 'IteratedBestResponseCar', 'ILQRCar']
 # Physical dimensions of cars/trucks
 CAR_LENGTH = 0.148 # length of car
 CAR_WIDTH = 1.9 * METERS_TO_VIS # width of car
@@ -62,7 +62,8 @@ TRUCK_WIDTH = 2.6 * METERS_TO_VIS # width of truck.
 FRICTION = 0.016745192307692 # from DSG toolbox; old friction value: 0.023
 # [steering (rad), acceleration (m/s^2)]
 # old car control bounds: [(-0.124, 0.124), (-2*0.0878, 0.0878)]
-CAR_CONTROL_BOUNDS = [(-2*0.13/3, 2*0.13/3), (-2*0.0878, 0.0878)] #
+NO_BOUNDS = [(10, 10), (10, 10)]
+CAR_CONTROL_BOUNDS = [(-4*0.13/3, 4*0.13/3), (-8*0.0878, 4 * 0.0878)] #
 # Control bounds for human car in the hierarchical setup to get a numerically 
 # stable algorithm. Temporary solution!
 HIERARCHICAL_HUMAN_CONTROL_BOUNDS = [(-0.104, 0.104), (-0.0878, 0.0878)]
@@ -100,7 +101,8 @@ INIT_PLAN_SCHEME_TO_NUM_OPTS_R = {'prev_opt': 1, 'lsr': 3, 'max_speed_prev_steer
 INIT_PLAN_SCHEME_TO_NUM_OPTS_H = {'prev_opt': 1, 'lsr': 3, 'max_speed_prev_steer': 1, 'maintain_speed_prev_steer': 1, 'maintain_speed_lsr': 3, 'maintain_speed_lsr_and_prev_opt': 4}
 
 ### Rewards
-LANE_REWARD_STDEV = LANE_WIDTH_VIS / 4. # standard deviation of lane Gaussian reward
+LANE_REWARD_STDEV_h = 1 * LANE_WIDTH_VIS / 4. # standard deviation of lane Gaussian reward
+LANE_REWARD_STDEV_r = 1.3 * LANE_WIDTH_VIS / 4. # standard deviation of lane Gaussian reward
 BEHIND_REWARD_SLOPE = 1.0 / 0.01 # slope of reward for being behind the other car
 STEER_REWARD_SCALING = 1.0 / CAR_CONTROL_BOUNDS[0][1]
 ACCELERATION_REWARD_SCALING = 1.0 / CAR_CONTROL_BOUNDS[1][1]
@@ -120,9 +122,9 @@ TRUCK_REWARD_WIDTH = CAR_WIDTH / 2. + TRUCK_WIDTH / 2. # x-direction
 TRUCK_REWARD_LENGTH = CAR_LENGTH / 2. + TRUCK_LENGTH / 2. # y-direction
 TRUCK_REWARD_SCALE = FENCE_REWARD_SCALE
 
-### Reward weights from IRL
-W_IRL_LANES = 0.959 # stay in center of lane
-W_IRL_FENCES = -46.271 # stay on the road (i.e. away from fences on sides of road)
-W_IRL_SPEED = -9.015 # keep at goal speed
-W_IRL_ROAD = 8.531 # stay on road
-W_IRL_OTHER_TRAJS = -57.604 # stay away from other cars
+# ### Reward weights from IRL
+# W_IRL_LANES = 0.959 # stay in center of lane
+# W_IRL_FENCES = -46.271 # stay on the road (i.e. away from fences on sides of road)
+# W_IRL_SPEED = -9.015 # keep at goal speed
+# W_IRL_ROAD = 8.531 # stay on road
+# W_IRL_OTHER_TRAJS = -57.604 # stay away from other cars

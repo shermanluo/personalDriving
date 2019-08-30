@@ -57,6 +57,7 @@ def bounded_control(fw, bounds, width=0.05):
     @feature
     def f(t, x, u):
         ret=0.
+        gg = u[0]
         for i, (a, b) in enumerate(bounds):
             return fw.exp((u[i]-b)/width) + fw.exp((a-u[i])/width)
     return f

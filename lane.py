@@ -28,10 +28,15 @@ class StraightLane(Lane):
         # squared cross-track error: distance to centerline of lane squared
         return self.crosstrack(x)**2
     
-    def gaussian(self, fw, stdev=constants.LANE_REWARD_STDEV):
+    def gaussian(self, fw, stdev=constants.LANE_REWARD_STDEV_r):
         @feature.feature
         def f(t, x, u):
+            #try:
             return fw.exp(-self.crosstrack_squared(x) / (2 * stdev**2))
+            #except Exception as e:
+                #import pdb
+                #pdb.set_trace(f)
+
         return f
 
 
