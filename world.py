@@ -128,7 +128,9 @@ def get_initial_states(scenario):
         # states
         x0_r = np.array([constants.RIGHT_LANE_CENTER, y0_r, np.pi/2., v0_r])
         x0_h = np.array([0.0, y0_h, np.pi/2., v0_h])
-        x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t, np.pi/2., v0_t])
+        #x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t, np.pi/2., v0_t])
+        x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t - 0.42825, np.pi/2., v0_t])
+
         return x0_r, x0_h, x0_t
     # elif scenario == 'truck_cut_in_hard_merge_human_lets_robot_in':
     #     x0_r = np.array([0.13, 40. * constants.METERS_TO_VIS, np.pi/2., constants.METERS_TO_VIS * 39.])
@@ -280,10 +282,6 @@ def world_highway(initial_states='overtaking',
         robot_car = car.IteratedBestResponseCar(x0_r, constants.DT, dyn,
         constants.CAR_CONTROL_BOUNDS, horizon=config.HORIZON,
         color=constants.COLOR_R, name=constants.NAME_R)
-    elif config.ROBOT_CAR == 'car.IteratedBestResponseCar':
-        robot_car = car.ILQRCar(x0_r, constants.DT, dyn,
-        constants.CAR_CONTROL_BOUNDS, horizon=config.HORIZON,
-        color=constants.COLOR_R, name=constants.NAME_R)
     elif config.ROBOT_CAR == 'car.ILQRCar':
         robot_car = car.ILQRCar(x0_r, constants.DT, dyn,
         constants.CAR_CONTROL_BOUNDS, horizon=config.HORIZON,
@@ -350,7 +348,8 @@ def world_highway(initial_states='overtaking',
             w_bounded_control=w_bounded_control_h,
             speed=ref_speed_h,
             fine_behind=fine_behind_h)
-        robot_car.reward_h_ignore_robot = robot_r_h_ignore_robot
+        #robot_car.reward_h_ignore_robot = robot_r_h_ignore_robot
+        robot_car.reward_h = robot_r_h_ignore_robot
     if config.ROBOT_CAR == 'car.HierarchicalCar' or config.ROBOT_CAR == 'car.PredictReactHierarchicalCar':
         # Robot's model of the human strategic value
         robot_strat_val_h = StrategicValue(robot_car.traj, robot_car.traj_h,

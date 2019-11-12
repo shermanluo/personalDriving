@@ -22,7 +22,7 @@ import ilqgames.python.CarExample as unicycle
 #import ilqgames.python.two_player_unicycle_4d_example as unicycle
 
 class Maximizer(object):
-    def __init__(self, f, vs, g={}, pre=None, gen=None, method='lbfgs', eps=1, iters=100000, debug=False, inf_ignore=np.inf):
+    def __init__(self, f, vs, g={}, pre=None, gen=None, method='bfgs', eps=1, iters=100000, debug=False, inf_ignore=np.inf):
         self.inf_ignore = inf_ignore
         self.debug = debug
         self.iters = iters
@@ -151,6 +151,10 @@ class IteratedBestResponseMaximizer(object):
 
         if init_grads:  # initialize the gradients
             self.init_grads()
+        # self.nested = self.optimizer = NestedMaximizer(
+        #    r_h, traj_h, r_r, traj_r,
+        #    use_second_order=True,
+        #    init_plan_scheme=init_plan_scheme)
 
     def create_get_init_plans_fn(self, init_plan_scheme):
         """Create the functions that return the plan initialization functions
@@ -332,12 +336,19 @@ class IteratedBestResponseMaximizer(object):
         # TODO: can we replace the .get_value() approach with using the numpy
         # version because at this point the Theano and numpy plans are the same?
         # plan_h_0 = np.hstack(self.traj_h.u) # initial robot plan (numpy version)
+        opt_h_list = []
+        for i in range(self.num_optimizations_h):
+            self.init_plan_h = self.get_init_plan_h_fn(i)
+            plan_h_0 = self.init_plan_h()
+            opt_h = scipy.optimize.fmin_l_bfgs_b(self.r_h_and_dr_h, x0=plan_h_0,
+                                                bounds=B)
+            opt_h_list.append(opt_h)
         plan_h_0 = np.hstack([v.get_value() for v in self.plan_h])
-
-        # optimal human response, value, etc.
         opt_h = scipy.optimize.fmin_l_bfgs_b(self.r_h_and_dr_h, x0=plan_h_0,
                                              bounds=B)
-        opt_plan_h = opt_h[0]  # optimal human response
+        opt_h_list.append(opt_h)
+        best_opt_h = min(opt_h_list, key=lambda opt: opt[1])
+        opt_plan_h= best_opt_h[0] # optimal robot control
 
         for v, (a, b) in zip(self.plan_h, self.control_indices_h):
             v.set_value(opt_plan_h[a:b])
@@ -368,12 +379,20 @@ class IteratedBestResponseMaximizer(object):
                 B += bounds[v]
             else:
                 B += [(None, None)] * (b - a)
-        plan_r_0 = np.hstack([v.get_value() for v in self.plan_r])
 
-        # optimal human response, value, etc.
+        opt_r_list = []
+        for i in range(self.num_optimizations_r):
+            self.init_plan_r = self.get_init_plan_r_fn(i)
+            plan_r_0 = self.init_plan_r()
+            opt_r = scipy.optimize.fmin_l_bfgs_b(self.r_r_and_dr_r, x0=plan_r_0,
+                                                 bounds=B)
+            opt_r_list.append(opt_r)
+        plan_r_0 = np.hstack([v.get_value() for v in self.plan_r])
         opt_r = scipy.optimize.fmin_l_bfgs_b(self.r_r_and_dr_r, x0=plan_r_0,
-                                             bounds = B)
-        opt_plan_r = opt_r[0]  # optimal human response
+                                             bounds=B)
+        opt_r_list.append(opt_r)
+        best_opt_r = min(opt_r_list, key=lambda opt: opt[1])
+        opt_plan_r = best_opt_r[0]  # optimal robot control
 
         for v, (a, b) in zip(self.plan_r, self.control_indices_r):
             v.set_value(opt_plan_r[a:b])
@@ -396,27 +415,25 @@ class IteratedBestResponseMaximizer(object):
 
         #for r in range(self.num_optimizations_r):
         #   for h in range(self.num_optimizations_h):
-        self.init_plan_r = self.get_init_plan_r_fn(0)
-        self.init_plan_h = self.get_init_plan_h_fn(0)
 
 
         #self.init_plan_r = self.get_my_init2(0)
         #self.init_plan_h = self.get_my_init(0)
-        #self.init_plan_h = self.get_my_init2(0)
         #
         # #pdb.set_trace()
-        opt_plan_r = self.init_plan_r()
-        opt_plan_h = self.init_plan_h()
-        for v, (a, b) in zip(self.plan_r, self.control_indices_r):
-            v.set_value(opt_plan_r[a:b])
+        # opt_plan_r, opt_plan_h = self.nested.maximize(bounds=bounds, bounds_inner=bounds)
+        # for v, (a, b) in zip(self.plan_r, self.control_indices_r):
+        #     v.set_value(opt_plan_r[a:b])
+
+
+        opt_plan_h = np.hstack((0, 8 * 0.0878) for _ in range(self.traj_h.horizon))
         for v, (a, b) in zip(self.plan_h, self.control_indices_h):
             v.set_value(opt_plan_h[a:b])
 
-
         #pdb.set_trace()
         for i in range(5):
-            opt_r = self.maximize_r(bounds = bounds)
-            opt_h = self.maximize_h(bounds = bounds)
+            opt_r = self.maximize_r(bounds=bounds)
+            opt_h = self.maximize_h(bounds=bounds)
             #print([x.get_value() for x in self.plan_r])
             #print([x.get_value() for x in self.plan_h])
         #pdb.set_trace()
@@ -762,8 +779,6 @@ class NestedMaximizer(object):
         maximize_end_time = time.time()
         time_profile.maximizer_time_profile.update(start_time, maximize_end_time)
         return opt_r[0], opt_h[0]
-
-
 # class NestedMaximizer(object):
 #     def __init__(self, r_h, traj_h, r_r, traj_r, use_timeup=True,
 #                  use_second_order=False, update_with_curr_plan_fn=None,
@@ -1108,7 +1123,6 @@ class NestedMaximizer(object):
 #         maximize_end_time = time.time()
 #         time_profile.maximizer_time_profile.update(start_time, maximize_end_time)
 #         return opt_r[0], opt_h
-
 class HierarchicalMaximizer(NestedMaximizer):
     # The following class maximizes the hierarchical game between the robot (leader)
     # and the human (follower). The tactic reward is given analytically as inputs
@@ -1311,7 +1325,6 @@ class ILQRMaximizer():
     def maximize(self, bounds={}):
         #return unicycle.run()
         return unicycle.run(self.traj.x0, None, None, self.dyn, self.r_r, self.r_h)
-
 class PredictReactMaximizer(NestedMaximizer):
     def init_grads(self):
         """Initialize the gradients based on the rewards.
@@ -1479,7 +1492,6 @@ class PredictReactMaximizer(NestedMaximizer):
         maximize_end_time = time.time()
         time_profile.maximizer_time_profile.update(start_time, maximize_end_time)
         return opt_r, opt_h
-
 # TODO: make this more modular so there isn't so much copied code
 class PredictReactHierarchicalMaximizer(PredictReactMaximizer):
     def __init__(self, r_h, traj_h, r_r, traj_r, mat_name, n, 
@@ -1668,7 +1680,6 @@ class PredictReactHierarchicalMaximizer(PredictReactMaximizer):
         end_time = time.time()
         time_profile.update_corners_time_profile.update(start_time, end_time)
         return cell_corners_new, vR_corners_new, vH_corners_new
-
 # Old HierarchicalMaximizer: duplicated a lot of code from the NestedMaximizer
 # class HierarchicalMaximizer(object):
 #     # The following class maximizes the hierarchical game between the robot (leader)

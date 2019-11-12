@@ -409,7 +409,6 @@ class Trajectory(object):
             c = self.x_th[t][1]-limit_dist
             return weight*inv(1+fw.exp(-ha*(x[1]-c)))
         return f
-    
     def reward(self, reward, fw):
         # Function for assembling the cumulative rewards.
         #

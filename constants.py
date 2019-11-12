@@ -55,7 +55,8 @@ ROBOT_CAR_OPTIONS = ['HierarchicalCar', 'NestedCar', 'SimpleOptimizerCar', 'Pred
 CAR_LENGTH = 0.148 # length of car
 CAR_WIDTH = 1.9 * METERS_TO_VIS # width of car
 TRUCK_LENGTH = 0.6957 # length of trucks
-TRUCK_WIDTH = 2.6 * METERS_TO_VIS # width of truck.
+TRUCK_WIDTH = 1 * METERS_TO_VIS # width of truck.
+#TRUCK_WIDTH = 0.5 * METERS_TO_VIS # width of truck.
 
 
 ### Dynamics

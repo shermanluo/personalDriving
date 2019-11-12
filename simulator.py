@@ -120,7 +120,7 @@ class Simulator(object):
             for car in self.world.cars:
                 if hasattr(car, 'human') and hasattr(car, 'traj_h'):
                     car.traj_h.x0 = car.human.traj.x0
-            #
+
             # for car in self.world.cars:
             #     if car is self.world.main_human_car:
             #         h_h = car.reward.reward_th(0, car.traj.x0, car.traj.u[0])
@@ -131,5 +131,6 @@ class Simulator(object):
             #         # r_h = car.reward_h.reward_th(0, car.traj_h.x0, car.traj_h.u[0])
             #         # self.rewards[1] += theano.function([], [r_h])()[0]
             # print(self.rewards)
+
 
 
