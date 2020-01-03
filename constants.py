@@ -55,8 +55,8 @@ ROBOT_CAR_OPTIONS = ['HierarchicalCar', 'NestedCar', 'SimpleOptimizerCar', 'Pred
 CAR_LENGTH = 0.148 # length of car
 CAR_WIDTH = 1.9 * METERS_TO_VIS # width of car
 TRUCK_LENGTH = 0.6957 # length of trucks
-TRUCK_WIDTH = 1 * METERS_TO_VIS # width of truck.
-#TRUCK_WIDTH = 0.5 * METERS_TO_VIS # width of truck.
+#TRUCK_WIDTH = 1 * METERS_TO_VIS # width of truck.
+TRUCK_WIDTH = 0.5 * METERS_TO_VIS # width of truck.
 
 
 ### Dynamics
@@ -64,7 +64,7 @@ FRICTION = 0.016745192307692 # from DSG toolbox; old friction value: 0.023
 # [steering (rad), acceleration (m/s^2)]
 # old car control bounds: [(-0.124, 0.124), (-2*0.0878, 0.0878)]
 NO_BOUNDS = [(10, 10), (10, 10)]
-CAR_CONTROL_BOUNDS = [(-4*0.13/3, 4*0.13/3), (-8*0.0878, 4 * 0.0878)] #
+CAR_CONTROL_BOUNDS = [(-3*0.13/3, 3*0.13/3), (-12*0.0878, 3 * 0.0878)] #
 # Control bounds for human car in the hierarchical setup to get a numerically 
 # stable algorithm. Temporary solution!
 HIERARCHICAL_HUMAN_CONTROL_BOUNDS = [(-0.104, 0.104), (-0.0878, 0.0878)]

@@ -129,7 +129,12 @@ def get_initial_states(scenario):
         x0_r = np.array([constants.RIGHT_LANE_CENTER, y0_r, np.pi/2., v0_r])
         x0_h = np.array([0.0, y0_h, np.pi/2., v0_h])
         #x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t, np.pi/2., v0_t])
-        x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t - 0.42825, np.pi/2., v0_t])
+        #x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t - 0.8764, np.pi/2., v0_t])
+        x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t - 0.81, np.pi/2., v0_t])
+        return x0_r, x0_h, x0_t
+    elif scenario == 'gap_creation':
+        
+
 
         return x0_r, x0_h, x0_t
     # elif scenario == 'truck_cut_in_hard_merge_human_lets_robot_in':
@@ -347,7 +352,8 @@ def world_highway(initial_states='overtaking',
             w_control=w_control,
             w_bounded_control=w_bounded_control_h,
             speed=ref_speed_h,
-            fine_behind=fine_behind_h)
+            fine_behind=fine_behind_h,
+            is_human=True)
         #robot_car.reward_h_ignore_robot = robot_r_h_ignore_robot
         robot_car.reward_h = robot_r_h_ignore_robot
     if config.ROBOT_CAR == 'car.HierarchicalCar' or config.ROBOT_CAR == 'car.PredictReactHierarchicalCar':
@@ -386,8 +392,17 @@ def world_highway(initial_states='overtaking',
             is_human=False)#,
             # strategic_value_mat_name=mat_name, robot_car=robot_car,
             # proj_np=proj_np, proj_th=proj_th)
+    if config.HUMAN_IGNORES_ROBOT:
+        human_r_h = reward.Reward(world, [],
+            w_lanes=w_lanes,
+            w_control=w_control,
+            w_bounded_control=w_bounded_control_h,
+            speed=ref_speed_h,
+            fine_behind=fine_behind_h,
+            is_human=True)#,
     human_car.reward = human_r_h
     human_car.reward_r = human_r_r
+
     if config.ROBOT_CAR == 'car.HierarchicalCar' or config.ROBOT_CAR == 'car.PredictReactHierarchicalCar':
         # Human's strategic value
         human_strat_val = StrategicValue(human_car.traj_r, human_car.traj,
@@ -544,15 +559,18 @@ def world_highway_truck_cut_in(initial_states='truck_cut_in_far_overtaking',
         robot_r_h_traj = robot_car.traj
     else: # robot believes human doesn't know robot trajectory
         robot_r_h_traj = robot_car.traj_linear
+
     robot_r_h = reward.Reward(world, [robot_r_h_traj],
             other_truck_trajs=[truck.traj],
             w_lanes=w_lanes,
             w_control=w_control,
             w_bounded_control=w_bounded_control_h,
             speed=ref_speed_h,
-            fine_behind=fine_behind_h)#,
+            fine_behind=fine_behind_h,
+            is_human=True)#,
             # strategic_value_mat_name=mat_name, robot_car=robot_car,
             # proj_np=proj_np, proj_th=proj_th)
+
     robot_r_r = reward.Reward(world, [robot_car.traj_h],
             other_truck_trajs=[truck.traj],
             w_lanes=w_lanes,
@@ -562,6 +580,18 @@ def world_highway_truck_cut_in(initial_states='truck_cut_in_far_overtaking',
             fine_behind=fine_behind_r)#,
             # strategic_value_mat_name=mat_name, robot_car=robot_car,
             # proj_np=proj_np, proj_th=proj_th)
+
+    if config.PREDICT_HUMAN_IGNORES_ROBOT:
+        # Reward for a human that ignores the existence of the robot.
+        robot_r_h = reward.Reward(world, other_car_trajs=[],
+            w_lanes=w_lanes,
+            w_control=w_control,
+            w_bounded_control=w_bounded_control_h,
+            speed=ref_speed_h,
+            fine_behind=fine_behind_h,
+            is_human=True)
+
+
     robot_car.reward = robot_r_r
     robot_car.reward_h = robot_r_h
     if config.ROBOT_CAR == 'car.HierarchicalCar':
@@ -590,7 +620,8 @@ def world_highway_truck_cut_in(initial_states='truck_cut_in_far_overtaking',
             w_control=w_control,
             w_bounded_control=w_bounded_control_h,
             speed=ref_speed_h,
-            fine_behind=fine_behind_h)#,
+            fine_behind=fine_behind_h,
+            is_human=True)#,
             # strategic_value_mat_name=mat_name, robot_car=robot_car,
             # proj_np=proj_np, proj_th=proj_th)
     human_r_r = reward.Reward(world, [human_car.traj],
@@ -602,6 +633,15 @@ def world_highway_truck_cut_in(initial_states='truck_cut_in_far_overtaking',
             fine_behind=fine_behind_r)#,
             # strategic_value_mat_name=mat_name, robot_car=robot_car,
             # proj_np=proj_np, proj_th=proj_th)
+    if config.HUMAN_IGNORES_ROBOT:
+        human_r_h = reward.Reward(world, [],
+            other_truck_trajs=[truck.traj],
+            w_lanes=w_lanes,
+            w_control=w_control,
+            w_bounded_control=w_bounded_control_h,
+            speed=ref_speed_h,
+            fine_behind=fine_behind_h,
+            is_human=True)#,
     human_car.reward = human_r_h
     human_car.reward_r = human_r_r
     if config.ROBOT_CAR == 'car.HierarchicalCar':

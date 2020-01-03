@@ -71,7 +71,9 @@ if __name__ == '__main__':
     parser.add_argument('--h_ignore_r', action='store_true',
         help="If True, robot will predict that human's reward is independent of the robot's \
               # trajectory (i.e. human ignores the robot).")
-
+    parser.add_argument('--predict_h_ignore_r', action='store_true',
+                        help="If True, robot will predict that human's reward is independent of the robot's \
+                  # trajectory (i.e. human ignores the robot).")
     # Saving data from this interaction
     parser.add_argument('-s', '--save_interaction_data_dir', default=None,
         help="Filename inside of the global interaction data directory to which to save the interaction data.")
@@ -126,7 +128,8 @@ if __name__ == '__main__':
     config.FRONT_Y_REL = args.front_y_rel
     config.INITIAL_SPEED_R = args.init_speed_r
     config.PROJECT_ONTO_STRAT_GRID = args.proj_strat_grid
-    config.PREDICT_HUMAN_IGNORES_ROBOT = args.h_ignore_r
+    config.PREDICT_HUMAN_IGNORES_ROBOT = args.predict_h_ignore_r
+    config.HUMAN_IGNORES_ROBOT = args.h_ignore_r
     
     init_planner = not (args.load_interaction_data_dir or args.manual)
     
