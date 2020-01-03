@@ -129,7 +129,11 @@ def get_initial_states(scenario):
         x0_r = np.array([constants.RIGHT_LANE_CENTER, y0_r, np.pi/2., v0_r])
         x0_h = np.array([0.0, y0_h, np.pi/2., v0_h])
         #x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t, np.pi/2., v0_t])
-        x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t - 0.42825, np.pi/2., v0_t])
+        #x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t - 0.8764, np.pi/2., v0_t])
+        x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t - 0.81, np.pi/2., v0_t])
+    elif scenario == 'gap_creation':
+        
+
 
         return x0_r, x0_h, x0_t
     # elif scenario == 'truck_cut_in_hard_merge_human_lets_robot_in':
@@ -550,7 +554,8 @@ def world_highway_truck_cut_in(initial_states='truck_cut_in_far_overtaking',
             w_control=w_control,
             w_bounded_control=w_bounded_control_h,
             speed=ref_speed_h,
-            fine_behind=fine_behind_h)#,
+            fine_behind=fine_behind_h,
+            is_human=True)#,
             # strategic_value_mat_name=mat_name, robot_car=robot_car,
             # proj_np=proj_np, proj_th=proj_th)
     robot_r_r = reward.Reward(world, [robot_car.traj_h],
@@ -590,7 +595,8 @@ def world_highway_truck_cut_in(initial_states='truck_cut_in_far_overtaking',
             w_control=w_control,
             w_bounded_control=w_bounded_control_h,
             speed=ref_speed_h,
-            fine_behind=fine_behind_h)#,
+            fine_behind=fine_behind_h,
+            is_human=True)#,
             # strategic_value_mat_name=mat_name, robot_car=robot_car,
             # proj_np=proj_np, proj_th=proj_th)
     human_r_r = reward.Reward(world, [human_car.traj],

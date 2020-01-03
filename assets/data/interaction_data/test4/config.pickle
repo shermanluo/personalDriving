@@ -4,19 +4,19 @@ p1
 (dp2
 S'main_robot_car'
 p3
-S'<car.IteratedBestResponseCar object at 0x134777490>'
+S'<car.NestedCar object at 0x134b2d550>'
 p4
 sS'lanes'
 p5
 (lp6
-S'<lane.StraightLane object at 0x134777310>'
+S'<lane.StraightLane object at 0x123ca9c10>'
 p7
-aS'<lane.StraightLane object at 0x1347772d0>'
+aS'<lane.StraightLane object at 0x134b2d410>'
 p8
 asS'cars'
 p9
 (dp10
-S'<car.Truck object at 0x136875e50>'
+S'<car.Truck object at 0x136c2d550>'
 p11
 (dp12
 S'name'
@@ -47,7 +47,7 @@ F0.1
 sS'is_robot'
 p23
 I00
-ssS'<car.IteratedBestResponseCar object at 0x134777490>'
+ssS'<car.NestedCar object at 0x134b2d550>'
 p24
 (dp25
 g13
@@ -65,7 +65,7 @@ sg22
 F0.1
 sg23
 I01
-ssS'<car.FollowerCar object at 0x1366e8cd0>'
+ssS'<car.FollowerCar object at 0x136aa6490>'
 p27
 (dp28
 g13
@@ -85,27 +85,27 @@ sg23
 I00
 sssS'main_human_car'
 p30
-S'<car.FollowerCar object at 0x1366e8cd0>'
+S'<car.FollowerCar object at 0x136aa6490>'
 p31
 sS'roads'
 p32
 (lp33
-S'<lane.StraightLane object at 0x134777310>'
+S'<lane.StraightLane object at 0x123ca9c10>'
 p34
 asS'fences'
 p35
 (lp36
-S'<lane.Fence object at 0x1347773d0>'
+S'<lane.Fence object at 0x134b2d490>'
 p37
-aS'<lane.Fence object at 0x134777410>'
+aS'<lane.Fence object at 0x134b2d4d0>'
 p38
 assS'rewards'
 p39
 (dp40
-S'<car.Truck object at 0x136875e50>'
+S'<car.Truck object at 0x136c2d550>'
 p41
 (dp42
-sS'<car.IteratedBestResponseCar object at 0x134777490>'
+sS'<car.NestedCar object at 0x134b2d550>'
 p43
 (dp44
 S'reward_h'
@@ -129,7 +129,7 @@ F-50.0
 sS'w_other_truck_trajs'
 p52
 (lp53
-F-60.0
+F-40.0
 asS'speed'
 p54
 F1.1243243243243244
@@ -174,7 +174,7 @@ sg51
 F-50.0
 sg52
 (lp67
-F-60.0
+F-40.0
 asg54
 F1.2297297297297298
 sg55
@@ -194,7 +194,7 @@ sg62
 F-60.0
 asg64
 F0.3512
-sssS'<car.FollowerCar object at 0x1366e8cd0>'
+sssS'<car.FollowerCar object at 0x136aa6490>'
 p70
 (dp71
 S'reward_r'
@@ -212,7 +212,7 @@ sg51
 F-50.0
 sg52
 (lp74
-F-60.0
+F-40.0
 asg54
 F1.2297297297297298
 sg55
@@ -246,7 +246,7 @@ sg51
 F-50.0
 sg52
 (lp78
-F-60.0
+F-40.0
 asg54
 F1.1243243243243244
 sg55
@@ -301,12 +301,12 @@ g14
 S'None'
 p95
 sg26
-S'maintain_speed_lsr'
+S'maintain_speed_lsr_and_prev_opt'
 p96
 sg29
-S'maintain_speed_lsr'
+S'maintain_speed_lsr_and_prev_opt'
 p97
 ssS'USE_SECOND_ORDER'
 p98
-I00
+I01
 ss.
