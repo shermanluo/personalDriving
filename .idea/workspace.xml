@@ -2,28 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bb300f7b-e26e-4bb8-9add-bdff4e6ec119" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test10/config.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test10/config.pickle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test10/interaction_data.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test10/interaction_data.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test2/config.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test2/config.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test2/interaction_data.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test2/interaction_data.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test3/config.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test3/config.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test3/interaction_data.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test3/interaction_data.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test4/config.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test4/config.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test4/interaction_data.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test4/interaction_data.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test5/config.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test5/config.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test5/interaction_data.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test5/interaction_data.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test6/config.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test6/config.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test6/interaction_data.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test6/interaction_data.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test7/config.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test7/config.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test7/interaction_data.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test7/interaction_data.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test8/config.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test8/config.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test8/interaction_data.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test8/interaction_data.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test9/config.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test9/config.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test9/interaction_data.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test9/interaction_data.pickle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test11/config.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test11/config.pickle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test11/interaction_data.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test11/interaction_data.pickle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/optimizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/optimizer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/reward.py" beforeDir="false" afterPath="$PROJECT_DIR$/reward.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trajectory.py" beforeDir="false" afterPath="$PROJECT_DIR$/trajectory.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/world.py" beforeDir="false" afterPath="$PROJECT_DIR$/world.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -34,27 +21,17 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/optimizer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="461">
-              <caret line="428" column="35" selection-start-line="428" selection-start-column="35" selection-end-line="428" selection-end-column="35" />
+            <state relative-caret-position="444">
+              <caret line="428" column="36" selection-start-line="428" selection-start-column="36" selection-end-line="428" selection-end-column="36" />
               <folding>
                 <element signature="e#0#16#0" expanded="true" />
                 <element signature="e#645#2354#0" />
                 <element signature="e#2405#3154#0" />
                 <element signature="e#3203#3237#0" />
-                <element signature="e#20895#38501#0" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/experiment.sh">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="17">
-              <caret line="2" column="44" selection-start-line="2" selection-start-column="15" selection-end-line="2" selection-end-column="44" />
             </state>
           </provider>
         </entry>
@@ -62,10 +39,22 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/world.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="199">
-              <caret line="132" column="65" selection-start-line="132" selection-start-column="65" selection-end-line="132" selection-end-column="65" />
+            <state relative-caret-position="1247">
+              <caret line="527" column="7" selection-start-line="527" selection-start-column="4" selection-end-line="527" selection-end-column="7" />
               <folding>
                 <element signature="e#0#27#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lane.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="450">
+              <caret line="30" column="62" selection-start-line="30" selection-start-column="62" selection-end-line="30" selection-end-column="62" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -94,11 +83,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/simulator.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="648">
-              <caret line="133" lean-forward="true" selection-start-line="133" selection-end-line="133" />
+            <state relative-caret-position="-3">
+              <caret line="84" column="18" selection-start-line="84" selection-start-column="18" selection-end-line="84" selection-end-column="18" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -109,11 +98,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/run.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="750">
-              <caret line="50" column="27" selection-start-line="50" selection-start-column="25" selection-end-line="50" selection-end-column="27" />
-              <folding>
-                <element signature="e#0#15#0" expanded="true" />
-              </folding>
+            <state>
+              <caret column="15" selection-start-column="15" selection-end-column="15" />
             </state>
           </provider>
         </entry>
@@ -121,8 +107,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/constants.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="665">
-              <caret line="130" column="28" selection-start-line="130" selection-start-column="26" selection-end-line="130" selection-end-column="28" />
+            <state relative-caret-position="964">
+              <caret line="104" column="44" selection-start-line="104" selection-start-column="44" selection-end-line="104" selection-end-column="44" />
             </state>
           </provider>
         </entry>
@@ -130,8 +116,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/config.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="443">
-              <caret line="67" column="22" selection-start-line="67" selection-start-column="22" selection-end-line="67" selection-end-column="22" />
+            <state relative-caret-position="528">
+              <caret line="69" column="18" selection-start-line="69" selection-start-column="18" selection-end-line="69" selection-end-column="18" />
             </state>
           </provider>
         </entry>
@@ -139,8 +125,20 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/reward.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="695">
-              <caret line="161" column="23" selection-start-line="161" selection-start-column="23" selection-end-line="161" selection-end-column="23" />
+            <state relative-caret-position="149">
+              <caret line="130" column="57" selection-start-line="130" selection-start-column="57" selection-end-line="130" selection-end-column="57" />
+              <folding>
+                <element signature="e#0#10#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/trajectory.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-1575">
+              <caret line="191" column="34" selection-start-line="191" selection-start-column="30" selection-end-line="191" selection-end-column="34" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -152,36 +150,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>hard_merg</find>
-      <find>PREDICT_HUMAN_IG</find>
-      <find>.reward_h</find>
-      <find>h_ignore_r</find>
-      <find>IteratedBe</find>
-      <find>--h_ignore_r</find>
-      <find>-r</find>
-      <find>ignore</find>
-      <find>SimpleOptimizer</find>
-      <find>HUMAN_CAR</find>
-      <find>5</find>
-      <find>PREDICT_HUMAN_IGNORES</find>
-      <find>horizon</find>
-      <find>projection</find>
-      <find>truck_</find>
-      <find>width</find>
-      <find>FRONT</find>
-      <find>projection.</find>
-      <find>TRUCK_WIDTH</find>
-      <find>-d</find>
-      <find>Iterated</find>
-      <find>w_other_traj</find>
-      <find>w_other_car_trajs</find>
-      <find>knows</find>
-      <find>HUMAN_IGNORES</find>
-      <find>robot_car.reward_h</find>
-      <find>-</find>
+      <find>target</find>
       <find>is_human</find>
       <find>truck</find>
-      <find>60</find>
+      <find>middle</find>
+      <find>0</find>
+      <find>center</find>
+      <find>gap_crea</find>
+      <find>LANE_REWARD</find>
+      <find>LANE_</find>
+      <find>w_behind</find>
+      <find>behind</find>
+      <find>lef</find>
+      <find>behin</find>
+      <find>fine_be</find>
+      <find>behind_rewa</find>
+      <find>lane</find>
+      <find>car</find>
+      <find>speed</find>
+      <find>fine_behind</find>
+      <find>gap_creati</find>
+      <find>left</find>
+      <find>[4.</find>
+      <find>gap</find>
+      <find>r_ga</find>
+      <find>ref_speed_h</find>
+      <find>gap_</find>
+      <find>w_lanes</find>
+      <find>ref</find>
+      <find>length</find>
+      <find>FINE_BE</find>
     </findStrings>
     <replaceStrings>
       <replace>follower_studies</replace>
@@ -199,15 +197,15 @@
         <option value="$PROJECT_DIR$/lane.py" />
         <option value="$PROJECT_DIR$/visualize.py" />
         <option value="$PROJECT_DIR$/car.py" />
-        <option value="$PROJECT_DIR$/trajectory.py" />
         <option value="$PROJECT_DIR$/run.py" />
         <option value="$PROJECT_DIR$/experiment.sh" />
-        <option value="$PROJECT_DIR$/reward.py" />
-        <option value="$PROJECT_DIR$/constants.py" />
-        <option value="$PROJECT_DIR$/config.py" />
-        <option value="$PROJECT_DIR$/world.py" />
-        <option value="$PROJECT_DIR$/optimizer.py" />
         <option value="$PROJECT_DIR$/simulator.py" />
+        <option value="$PROJECT_DIR$/trajectory.py" />
+        <option value="$PROJECT_DIR$/constants.py" />
+        <option value="$PROJECT_DIR$/world.py" />
+        <option value="$PROJECT_DIR$/reward.py" />
+        <option value="$PROJECT_DIR$/config.py" />
+        <option value="$PROJECT_DIR$/optimizer.py" />
       </list>
     </option>
   </component>
@@ -220,6 +218,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -227,29 +226,10 @@
               <item name="DrivingSimulator" type="b2602c69:ProjectViewProjectNode" />
               <item name="DrivingSimulator" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="DrivingSimulator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="DrivingSimulator" type="462c0819:PsiDirectoryNode" />
-              <item name="assets" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="DrivingSimulator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="DrivingSimulator" type="462c0819:PsiDirectoryNode" />
-              <item name="assets" type="462c0819:PsiDirectoryNode" />
-              <item name="data" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="DrivingSimulator" type="b2602c69:ProjectViewProjectNode" />
-              <item name="DrivingSimulator" type="462c0819:PsiDirectoryNode" />
-              <item name="assets" type="462c0819:PsiDirectoryNode" />
-              <item name="data" type="462c0819:PsiDirectoryNode" />
-              <item name="mat" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -349,15 +329,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dynamics.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-506">
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ilqgames/python/CarSystemControlCost.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -445,20 +416,53 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lane.py">
+    <entry file="file://$PROJECT_DIR$/utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="450">
-          <caret line="30" column="62" selection-start-line="30" selection-start-column="62" selection-end-line="30" selection-end-column="62" />
+        <state relative-caret-position="-1061">
           <folding>
-            <element signature="e#0#18#0" expanded="true" />
+            <element signature="e#0#34#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dynamics.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-635">
+          <caret column="15" selection-start-column="15" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/experiment.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-13">
+          <caret column="19" selection-start-column="19" selection-end-column="19" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/trajectory.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2103">
-          <caret line="311" column="30" selection-start-line="311" selection-start-column="24" selection-end-line="311" selection-end-column="30" />
+        <state relative-caret-position="-1575">
+          <caret line="191" column="34" selection-start-line="191" selection-start-column="30" selection-end-line="191" selection-end-column="34" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/reward.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="149">
+          <caret line="130" column="57" selection-start-line="130" selection-start-column="57" selection-end-line="130" selection-end-column="57" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/simulator.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-3">
+          <caret line="84" column="18" selection-start-line="84" selection-start-column="18" selection-end-line="84" selection-end-column="18" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>
@@ -486,77 +490,56 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/experiment.sh">
+    <entry file="file://$PROJECT_DIR$/lane.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="2" column="44" selection-start-line="2" selection-start-column="15" selection-end-line="2" selection-end-column="44" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/run.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="750">
-          <caret line="50" column="27" selection-start-line="50" selection-start-column="25" selection-end-line="50" selection-end-column="27" />
+        <state relative-caret-position="450">
+          <caret line="30" column="62" selection-start-line="30" selection-start-column="62" selection-end-line="30" selection-end-column="62" />
           <folding>
-            <element signature="e#0#15#0" expanded="true" />
+            <element signature="e#0#18#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/reward.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="695">
-          <caret line="161" column="23" selection-start-line="161" selection-start-column="23" selection-end-line="161" selection-end-column="23" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="443">
-          <caret line="67" column="22" selection-start-line="67" selection-start-column="22" selection-end-line="67" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/constants.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="665">
-          <caret line="130" column="28" selection-start-line="130" selection-start-column="26" selection-end-line="130" selection-end-column="28" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/world.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="199">
-          <caret line="132" column="65" selection-start-line="132" selection-start-column="65" selection-end-line="132" selection-end-column="65" />
+        <state relative-caret-position="1247">
+          <caret line="527" column="7" selection-start-line="527" selection-start-column="4" selection-end-line="527" selection-end-column="7" />
           <folding>
             <element signature="e#0#27#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/run.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="15" selection-start-column="15" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/constants.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="964">
+          <caret line="104" column="44" selection-start-line="104" selection-start-column="44" selection-end-line="104" selection-end-column="44" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="528">
+          <caret line="69" column="18" selection-start-line="69" selection-start-column="18" selection-end-line="69" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/optimizer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="461">
-          <caret line="428" column="35" selection-start-line="428" selection-start-column="35" selection-end-line="428" selection-end-column="35" />
+        <state relative-caret-position="444">
+          <caret line="428" column="36" selection-start-line="428" selection-start-column="36" selection-end-line="428" selection-end-column="36" />
           <folding>
             <element signature="e#0#16#0" expanded="true" />
             <element signature="e#645#2354#0" />
             <element signature="e#2405#3154#0" />
             <element signature="e#3203#3237#0" />
-            <element signature="e#20895#38501#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/simulator.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="648">
-          <caret line="133" lean-forward="true" selection-start-line="133" selection-end-line="133" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
           </folding>
         </state>
       </provider>

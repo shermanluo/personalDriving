@@ -132,7 +132,19 @@ def get_initial_states(scenario):
         #x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t - 0.8764, np.pi/2., v0_t])
         x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t - 0.81, np.pi/2., v0_t])
     elif scenario == 'gap_creation':
-        
+        y0_h = 0.
+        y0_r = y0_h - 5. * constants.METERS_TO_VIS
+        y0_t = y0_h + config.FRONT_Y_REL
+        v0_h = constants.METERS_TO_VIS * 31.
+        v0_r = constants.METERS_TO_VIS * 31
+        #v0_t = constants.TRUCK_CONSTANT_SPEED
+        v0_t = constants.METERS_TO_VIS*30.0
+        # states
+        x0_r = np.array([constants.RIGHT_LANE_CENTER, y0_h - 0.3, np.pi / 2., v0_r])
+        x0_h = np.array([0.0, y0_h, np.pi / 2., v0_h])
+        # x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t, np.pi/2., v0_t])
+        # x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t - 0.8764, np.pi/2., v0_t])
+        x0_t = np.array([constants.LEFT_LANE_CENTER, y0_t - 1.4, np.pi / 2., v0_t])
 
 
         return x0_r, x0_h, x0_t
@@ -267,7 +279,7 @@ def world_highway(initial_states='overtaking',
     x0_r, x0_h = get_initial_states(initial_states)
 
     # Robot car setup
-    ref_speed_r = constants.METERS_TO_VIS*35.0
+    ref_speed_r = constants.METERS_TO_VIS*33.0
     initial_speed_r = constants.METERS_TO_VIS*32.0
     if config.ROBOT_CAR == 'car.HierarchicalCar' or config.ROBOT_CAR == 'car.PredictReactHierarchicalCar':
         car_class = eval(config.ROBOT_CAR)
@@ -487,7 +499,8 @@ def world_highway_truck_cut_in(initial_states='truck_cut_in_far_overtaking',
     x0_r, x0_h, x0_t = get_initial_states(initial_states)
 
     # Robot car setup
-    ref_speed_r = constants.METERS_TO_VIS * 35.0
+    #ref_speed_r = constants.METERS_TO_VIS * 35.0
+    ref_speed_r = constants.METERS_TO_VIS * 34.0  # speed for gap creation
     if config.ROBOT_CAR == 'car.HierarchicalCar':
         robot_car = car.HierarchicalCar(x0_r, constants.DT, dyn, 
             constants.CAR_CONTROL_BOUNDS, horizon=config.HORIZON, 
@@ -512,7 +525,7 @@ def world_highway_truck_cut_in(initial_states='truck_cut_in_far_overtaking',
         sys.exit()
 
     # Human car setup
-    ref_speed_h = constants.METERS_TO_VIS * 32. # x0_h[3]
+    ref_speed_h = constants.METERS_TO_VIS * 31. # x0_h[3]
     human_car = eval(config.HUMAN_CAR)(x0_h, constants.DT, dyn, 
             constants.CAR_CONTROL_BOUNDS, horizon=config.HORIZON, 
             color=constants.COLOR_H, name=constants.NAME_H)
@@ -538,7 +551,7 @@ def world_highway_truck_cut_in(initial_states='truck_cut_in_far_overtaking',
                 fences, interaction_data=interaction_data)
 
     # rewards
-    w_lanes = [4., 1.]
+    w_lanes = [4., 2.]
     w_control = -0.1
     w_bounded_control_h = -50.0 # bounded control weight for human
     w_bounded_control_r = -50.0 # bounded control weight for robot

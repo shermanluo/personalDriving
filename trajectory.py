@@ -266,12 +266,51 @@ class Trajectory(object):
         return x_sigmoid * y_sigmoid
 
     
+    # def not_behind(self, fw, weight):
+    #     # Not behind (another car) penalty represeneted as sigmoids.
+    #     assert(fw == np or fw == tt or fw == torch)
+    #     # Make the reward function applied to the state trajectory
+    #     # by calling self.x_from_x0 and using  the computational framework fw.
+    #     # Note: self.x_from_x0 is a function instead of a value so that the
+    #     # current state trajectory can be used.
+    #     # Define inverse operation depending on framework (Theano or otherwise)
+    #     if fw == np:
+    #         inv = lambda x: 1.0 / x
+    #     elif fw == torch:
+    #         inv = torch.reciprocal
+    #     elif fw == tt:
+    #         inv = tt.inv
+    #     @feature.feature
+    #     def f(t, x, u):
+    #         # Reward evaluated at time t (t=0 is the current state) when the
+    #         # other car is at state x with plan u.
+    #         #pdb.set_trace()
+    #         return Trajectory.r_not_behind(self.x_from_x0(fw)[t], x, weight, fw, inv)
+    #     return f
+    #
+    # @staticmethod
+    # def r_not_behind(this_x0, other_x0, weight, fw, inv):
+    #     # Negative sigmoid reward for being behind this car.
+    #     # Arguments:
+    #     #  - this_x0: state of this car
+    #     #  - other_x0: state of other car
+    #     #  - weight: constant multiplier
+    #     #  - fw: computational framework
+    #     #  - inv: inversion operation, depending on numpy or Theano
+    #     assert(fw == np or fw == tt or fw == torch)
+    #     x_rel = other_x0[0]-this_x0[0]
+    #     y_rel = other_x0[1]-this_x0[1]
+    #     term1 = inv(1+fw.exp(-constants.BEHIND_REWARD_SLOPE * (x_rel+0.13/2)))
+    #     term2 = inv(1+fw.exp(constants.BEHIND_REWARD_SLOPE * (x_rel-0.13/2)))
+    #     term3 = inv(1+fw.exp(constants.BEHIND_REWARD_SLOPE * y_rel))
+    #     return weight*term1*term2*term3
+
     def not_behind(self, fw, weight):
         # Not behind (another car) penalty represeneted as sigmoids.
         assert(fw == np or fw == tt or fw == torch)
         # Make the reward function applied to the state trajectory
         # by calling self.x_from_x0 and using  the computational framework fw.
-        # Note: self.x_from_x0 is a function instead of a value so that the 
+        # Note: self.x_from_x0 is a function instead of a value so that the
         # current state trajectory can be used.
         # Define inverse operation depending on framework (Theano or otherwise)
         if fw == np:
@@ -298,12 +337,11 @@ class Trajectory(object):
         #  - fw: computational framework
         #  - inv: inversion operation, depending on numpy or Theano
         assert(fw == np or fw == tt or fw == torch)
-        x_rel = other_x0[0]-this_x0[0]
-        y_rel = other_x0[1]-this_x0[1]
-        term1 = inv(1+fw.exp(-constants.BEHIND_REWARD_SLOPE * (x_rel+0.13/2)))
-        term2 = inv(1+fw.exp(constants.BEHIND_REWARD_SLOPE * (x_rel-0.13/2)))
-        term3 = inv(1+fw.exp(constants.BEHIND_REWARD_SLOPE * y_rel))
-        return weight*term1*term2*term3
+        x_rel = other_x0[0]-this_x0[0] #x rel low is good
+        y_rel = other_x0[1]-this_x0[1] #y_rel high is good
+        term2 = inv(1+fw.exp(constants.BEHIND_REWARD_SLOPE * (x_rel - 0.13/2)))
+        term3 = inv(1+fw.exp(constants.BEHIND_REWARD_SLOPE * -(y_rel)))
+        return -weight*term2*term3
 
     # TODO: implement x_func functionality like for gaussian and not_behind
     # HERE FOUND ERROR!!!  wa was 1/0.025 but should be 1/0.01!!! So now things should be less critical (though perhaps still present!!)

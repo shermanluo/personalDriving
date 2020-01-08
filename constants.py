@@ -70,7 +70,7 @@ CAR_CONTROL_BOUNDS = [(-3*0.13/3, 3*0.13/3), (-12*0.0878, 3 * 0.0878)] #
 HIERARCHICAL_HUMAN_CONTROL_BOUNDS = [(-0.104, 0.104), (-0.0878, 0.0878)]
 TRUCK_CONTROL_BOUNDS = [(-5*0.0206, 0.0206)] # m/s^2
 # Options describing the initial states of the cars for different scenarios
-INITIAL_STATE_OPTIONS = ['far_overtaking', 'overtaking', 'easy_merging', 'hard_merging', 'truck_cut_in_human_in_front', 'truck_cut_in_robot_in_front', 'truck_cut_in_hard_merge']
+INITIAL_STATE_OPTIONS = ['far_overtaking', 'overtaking', 'easy_merging', 'hard_merging', 'truck_cut_in_human_in_front', 'truck_cut_in_robot_in_front', 'truck_cut_in_hard_merge', 'gap_creation']
 # Constant speed of the truck
 TRUCK_CONSTANT_SPEED = METERS_TO_VIS * 26.8224 # corresponds to 60 mph
 
@@ -102,8 +102,8 @@ INIT_PLAN_SCHEME_TO_NUM_OPTS_R = {'prev_opt': 1, 'lsr': 3, 'max_speed_prev_steer
 INIT_PLAN_SCHEME_TO_NUM_OPTS_H = {'prev_opt': 1, 'lsr': 3, 'max_speed_prev_steer': 1, 'maintain_speed_prev_steer': 1, 'maintain_speed_lsr': 3, 'maintain_speed_lsr_and_prev_opt': 4}
 
 ### Rewards
-LANE_REWARD_STDEV_h = 1 * LANE_WIDTH_VIS / 4. # standard deviation of lane Gaussian reward
-LANE_REWARD_STDEV_r = 1.3 * LANE_WIDTH_VIS / 4. # standard deviation of lane Gaussian reward
+LANE_REWARD_STDEV_h = 1 * LANE_WIDTH_VIS / 6. # standard deviation of lane Gaussian reward
+LANE_REWARD_STDEV_r = 1 * LANE_WIDTH_VIS / 6. # standard deviation of lane Gaussian reward
 BEHIND_REWARD_SLOPE = 1.0 / 0.01 # slope of reward for being behind the other car
 STEER_REWARD_SCALING = 1.0 / CAR_CONTROL_BOUNDS[0][1]
 ACCELERATION_REWARD_SCALING = 1.0 / CAR_CONTROL_BOUNDS[1][1]

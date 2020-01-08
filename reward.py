@@ -125,10 +125,10 @@ class Reward(object):
             if self.is_human:
                 w = w_other_car_traj
             else:
-                w = -25
+                w = w_other_car_traj
             if self.fine_behind:
                 rewards['other traj gaussian ' + str(i)] = (w *
-                    other_car_traj.gaussian(fw, length=.14, width=.03))
+                    other_car_traj.gaussian(fw, length=.1, width=.03))
             else:
                 rewards['other traj gaussian ' + str(i)] = (w *
                     other_car_traj.gaussian(fw, length=.14, width=.03))
@@ -147,6 +147,7 @@ class Reward(object):
                 lane_gaussian_std = constants.LANE_REWARD_STDEV_h
             else:
                 lane_gaussian_std = constants.LANE_REWARD_STDEV_r
+            print("lane", w_lane)
             state_r += w_lane * lane.gaussian(fw=fw, stdev=lane_gaussian_std)
         for fence, w_fence in zip(self.world.fences, self.w_fences):
             if self.fence_sigmoid: # sigmoid fence reward
@@ -159,11 +160,11 @@ class Reward(object):
             if self.is_human:
                 w = w_other_traj
             else:
-                w = -25
+                w = w_other_traj
             print(w, self.is_human)
             if self.fine_behind:
                 state_r += (w *
-                    other_traj.gaussian(fw, length=.14, width=.03))
+                    other_traj.gaussian(fw, length=.1, width=.03))
             else:
                 state_r += (w *
                     other_traj.gaussian(fw, length=.14, width=.03) +
