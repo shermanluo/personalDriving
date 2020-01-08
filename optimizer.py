@@ -426,7 +426,7 @@ class IteratedBestResponseMaximizer(object):
         #     v.set_value(opt_plan_r[a:b])
 
 
-        opt_plan_h = np.hstack((0, 8 * 0.0878) for _ in range(self.traj_h.horizon))
+        opt_plan_h = np.hstack((0, -8 * 0.0878) for _ in range(self.traj_h.horizon))
         for v, (a, b) in zip(self.plan_h, self.control_indices_h):
             v.set_value(opt_plan_h[a:b])
 
