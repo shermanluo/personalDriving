@@ -67,7 +67,7 @@ W_FENCES = -50.0 # stay on the road (i.e. away from fences on sides of road)
 W_SPEED = -10.0 # keep at goal speed
 W_OTHER_CAR_TRAJS = -80.0 # stay away from other cars
 W_OTHER_TRUCK_TRAJS = -50.0 # stay away from other trucks
-W_BEHIND = -20.745 # don't be behind the other car
+W_BEHIND = -25 # don't be behind the other car
 W_CONTROL = -0.1 # cost for control
 W_BOUNDED_CONTROL = -100.0 # don't violate control bounds
 # reward settings
