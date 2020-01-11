@@ -145,9 +145,11 @@ def get_initial_states(scenario):
         # x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t, np.pi/2., v0_t])
         # x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t - 0.8764, np.pi/2., v0_t])
         x0_t = np.array([constants.LEFT_LANE_CENTER, y0_t - 1.4, np.pi / 2., v0_t])
-
-
         return x0_r, x0_h, x0_t
+    elif scenario == 'double_merge':
+        x0_r = np.array([constants.RIGHT_LANE_CENTER, 0.0, np.pi / 2., initial_speed_r])
+        x0_h = np.array([constants.RIGHT_LANE_CENTER, 0.185, np.pi / 2., initial_speed_h])
+
     # elif scenario == 'truck_cut_in_hard_merge_human_lets_robot_in':
     #     x0_r = np.array([0.13, 40. * constants.METERS_TO_VIS, np.pi/2., constants.METERS_TO_VIS * 39.])
     #     x0_h = np.array([0.0, 50. * constants.METERS_TO_VIS, np.pi/2., constants.METERS_TO_VIS * 30.])
@@ -279,7 +281,7 @@ def world_highway(initial_states='overtaking',
     x0_r, x0_h = get_initial_states(initial_states)
 
     # Robot car setup
-    ref_speed_r = constants.METERS_TO_VIS*33.0
+    ref_speed_r = constants.METERS_TO_VIS*35.0
     initial_speed_r = constants.METERS_TO_VIS*32.0
     if config.ROBOT_CAR == 'car.HierarchicalCar' or config.ROBOT_CAR == 'car.PredictReactHierarchicalCar':
         car_class = eval(config.ROBOT_CAR)
@@ -326,7 +328,7 @@ def world_highway(initial_states='overtaking',
                 fences, interaction_data=interaction_data)
 
     # rewards
-    w_lanes = [4., 1.]
+    w_lanes = [16.447, 1.]
     w_control = -0.1
     w_bounded_control_h = -50.0 # bounded control weight for human
     w_bounded_control_r = -50.0 # bounded control weight for robot
@@ -337,7 +339,7 @@ def world_highway(initial_states='overtaking',
     else: # robot believes human doesn't know robot trajectory
         robot_r_h_traj = robot_car.traj_linear
     robot_r_h = reward.Reward(world, [robot_r_h_traj],
-            w_lanes=w_lanes,
+            w_lanes=[8., 1.],
             w_control=w_control,
             w_bounded_control=w_bounded_control_h,
             speed=ref_speed_h,
@@ -385,7 +387,7 @@ def world_highway(initial_states='overtaking',
     # Rewards and strategic value modeled by the human WHEN SIMULATED 
     # (for both human and robot, respectively)
     human_r_h = reward.Reward(world, [human_car.traj_r],
-            w_lanes=w_lanes,
+            w_lanes=[4., 1.],
             w_control=w_control,
             w_bounded_control=w_bounded_control_h,
             speed=ref_speed_h,

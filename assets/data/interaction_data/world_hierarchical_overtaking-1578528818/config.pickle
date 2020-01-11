@@ -4,31 +4,31 @@ p1
 (dp2
 S'main_robot_car'
 p3
-S'<car.IteratedBestResponseCar object at 0x13da8e550>'
+S'<car.IteratedBestResponseCar object at 0x1369940d0>'
 p4
 sS'lanes'
 p5
 (lp6
-S'<lane.StraightLane object at 0x13da8e3d0>'
+S'<lane.StraightLane object at 0x136994410>'
 p7
-aS'<lane.StraightLane object at 0x13da8e390>'
+aS'<lane.StraightLane object at 0x1369943d0>'
 p8
 asS'cars'
 p9
 (dp10
-S'<car.IteratedBestResponseCar object at 0x13da8e550>'
+S'<car.FollowerCar object at 0x136a007d0>'
 p11
 (dp12
 S'name'
 p13
-S'robot'
+S'human'
 p14
 sS'is_user_controlled'
 p15
 I00
 sS'is_follower'
 p16
-I00
+I01
 sS'bounds'
 p17
 (lp18
@@ -46,17 +46,17 @@ p22
 F0.1
 sS'is_robot'
 p23
-I01
-ssS'<car.FollowerCar object at 0x13dc92150>'
+I00
+ssS'<car.IteratedBestResponseCar object at 0x1369940d0>'
 p24
 (dp25
 g13
-S'human'
+S'robot'
 p26
 sg15
 I00
 sg16
-I01
+I00
 sg17
 g18
 sg21
@@ -64,30 +64,30 @@ I8
 sg22
 F0.1
 sg23
-I00
+I01
 sssS'main_human_car'
 p27
-S'<car.FollowerCar object at 0x13dc92150>'
+S'<car.FollowerCar object at 0x136a007d0>'
 p28
 sS'roads'
 p29
 (lp30
-S'<lane.StraightLane object at 0x13da8e3d0>'
+S'<lane.StraightLane object at 0x136994410>'
 p31
 asS'fences'
 p32
 (lp33
-S'<lane.Fence object at 0x13da8e490>'
+S'<lane.Fence object at 0x136994950>'
 p34
-aS'<lane.Fence object at 0x13da8e4d0>'
+aS'<lane.Fence object at 0x136994910>'
 p35
 assS'rewards'
 p36
 (dp37
-S'<car.IteratedBestResponseCar object at 0x13da8e550>'
+S'<car.FollowerCar object at 0x136a007d0>'
 p38
 (dp39
-S'reward_h'
+S'reward_r'
 p40
 (dp41
 S'fence_sigmoid'
@@ -95,7 +95,7 @@ p42
 I01
 sS'fine_behind'
 p43
-I01
+I00
 sS'car_control_bounds'
 p44
 g18
@@ -110,14 +110,14 @@ p47
 (lp48
 sS'speed'
 p49
-F1.1243243243243244
+F1.2297297297297298
 sS'steering_bound'
 p50
 F0.13
 sS'w_lanes'
 p51
 (lp52
-F8.0
+F4.0
 aF1.0
 asS'w_speed'
 p53
@@ -143,7 +143,7 @@ p60
 g42
 I01
 sg43
-I00
+I01
 sg44
 g18
 sg45
@@ -153,36 +153,34 @@ F-50.0
 sg47
 (lp62
 sg49
-F1.2297297297297298
+F1.1243243243243244
 sg50
 F0.13
 sg51
-(lp63
-F100.0
-aF1.0
-asg53
+g52
+sg53
 F-10.0
 sg54
-(lp64
+(lp63
 F-50.0
 aF-50.0
 asg56
 I-25
 sg57
-(lp65
+(lp64
 F-80.0
 asg59
 F0.2634
-sssS'<car.FollowerCar object at 0x13dc92150>'
-p66
-(dp67
-S'reward_r'
-p68
-(dp69
+sssS'<car.IteratedBestResponseCar object at 0x1369940d0>'
+p65
+(dp66
+S'reward_h'
+p67
+(dp68
 g42
 I01
 sg43
-I00
+I01
 sg44
 g18
 sg45
@@ -190,14 +188,16 @@ F-0.1
 sg46
 F-50.0
 sg47
-(lp70
+(lp69
 sg49
-F1.2297297297297298
+F1.1243243243243244
 sg50
 F0.13
 sg51
-g63
-sg53
+(lp70
+F3.0
+aF1.0
+asg53
 F-10.0
 sg54
 (lp71
@@ -215,7 +215,7 @@ ssg60
 g42
 I01
 sg43
-I01
+I00
 sg44
 g18
 sg45
@@ -225,68 +225,65 @@ F-50.0
 sg47
 (lp74
 sg49
-F1.1243243243243244
+F1.2297297297297298
 sg50
 F0.13
 sg51
-(lp75
-F4.0
-aF1.0
-asg53
+g52
+sg53
 F-10.0
 sg54
-(lp76
+(lp75
 F-50.0
 aF-50.0
 asg56
 I-25
 sg57
-(lp77
+(lp76
 F-80.0
 asg59
 F0.2634
 ssssS'config'
-p78
-(dp79
+p77
+(dp78
 S'HORIZON'
-p80
+p79
 I8
 sS'NESTEDMAX_MAXITER_INNER'
-p81
+p80
 I20
 sS'STRAT_DIM'
-p82
+p81
 I4
 sS'STRATEGIC_VALUE_4D_DATA_DIR'
-p83
+p82
 S'assets/data/mat/strategic_value_4d_offgrid_projection_vrel/'
-p84
+p83
 sS'STRATEGIC_VALUE_3D_DATA_DIR'
-p85
+p84
 S'assets/data/mat/strategic_value_3d_new/'
-p86
+p85
 sS'HUMAN_BETA'
-p87
+p86
 NsS'OPT_TIMEOUT'
-p88
+p87
 Finf
 sS'STRATEGIC_VALUE_SCALE'
-p89
+p88
 F0.0
 sS'INIT_PLAN_SCHEME'
-p90
-(dp91
+p89
+(dp90
 S'truck'
-p92
+p91
 S'None'
-p93
-sg14
-S'maintain_speed_lsr_and_prev_opt'
-p94
+p92
 sg26
 S'maintain_speed_lsr_and_prev_opt'
-p95
+p93
+sg14
+g93
 ssS'USE_SECOND_ORDER'
-p96
+p94
 I01
 ss.

@@ -125,13 +125,13 @@ class Reward(object):
             if self.is_human:
                 w = w_other_car_traj
             else:
-                w = w_other_car_traj
+                w = -20
             if self.fine_behind:
                 rewards['other traj gaussian ' + str(i)] = (w *
-                    other_car_traj.gaussian(fw, length=.1, width=.03))
+                    other_car_traj.gaussian(fw, length=.06, width=.03))
             else:
                 rewards['other traj gaussian ' + str(i)] = (w *
-                    other_car_traj.gaussian(fw, length=.14, width=.03))
+                    other_car_traj.gaussian(fw, length=.06, width=.03))
                 rewards['other traj not behind ' + str(i)] = other_car_traj.not_behind(
                     fw, self.w_behind)
         for i, (other_truck_traj, w_other_truck_traj) in enumerate(zip(self.other_truck_trajs, self.w_other_truck_trajs)):
@@ -160,14 +160,14 @@ class Reward(object):
             if self.is_human:
                 w = w_other_traj
             else:
-                w = w_other_traj
+                w = -20
             print(w, self.is_human)
             if self.fine_behind:
                 state_r += (w *
-                    other_traj.gaussian(fw, length=.1, width=.03))
+                    other_traj.gaussian(fw, length=.06, width=.03))
             else:
                 state_r += (w *
-                    other_traj.gaussian(fw, length=.14, width=.03) +
+                    other_traj.gaussian(fw, length=.06, width=.03) +
                     other_traj.not_behind(fw, self.w_behind))
         for other_truck_traj, w_other_truck_traj in zip(self.other_truck_trajs, self.w_other_truck_trajs):
             state_r += (w_other_truck_traj *
