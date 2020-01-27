@@ -4,19 +4,19 @@ p1
 (dp2
 S'main_robot_car'
 p3
-S'<car.IteratedBestResponseCar object at 0x1391f1550>'
+S'<car.IteratedBestResponseCar object at 0x13a535b50>'
 p4
 sS'lanes'
 p5
 (lp6
-S'<lane.StraightLane object at 0x1391f13d0>'
+S'<lane.StraightLane object at 0x13a535950>'
 p7
-aS'<lane.StraightLane object at 0x1391f1390>'
+aS'<lane.StraightLane object at 0x13a5359d0>'
 p8
 asS'cars'
 p9
 (dp10
-S'<car.FollowerCar object at 0x13b176d10>'
+S'<car.FollowerCar object at 0x13a5b0210>'
 p11
 (dp12
 S'name'
@@ -47,7 +47,7 @@ F0.1
 sS'is_robot'
 p23
 I00
-ssS'<car.IteratedBestResponseCar object at 0x1391f1550>'
+ssS'<car.IteratedBestResponseCar object at 0x13a535b50>'
 p24
 (dp25
 g13
@@ -67,24 +67,24 @@ sg23
 I01
 sssS'main_human_car'
 p27
-S'<car.FollowerCar object at 0x13b176d10>'
+S'<car.FollowerCar object at 0x13a5b0210>'
 p28
 sS'roads'
 p29
 (lp30
-S'<lane.StraightLane object at 0x1391f13d0>'
+S'<lane.StraightLane object at 0x13a535950>'
 p31
 asS'fences'
 p32
 (lp33
-S'<lane.Fence object at 0x1391f1490>'
+S'<lane.Fence object at 0x13a535a90>'
 p34
-aS'<lane.Fence object at 0x1391f14d0>'
+aS'<lane.Fence object at 0x13a535ad0>'
 p35
 assS'rewards'
 p36
 (dp37
-S'<car.FollowerCar object at 0x13b176d10>'
+S'<car.FollowerCar object at 0x13a5b0210>'
 p38
 (dp39
 S'reward_r'
@@ -173,7 +173,7 @@ sg57
 F-80.0
 asg59
 F0.2634
-sssS'<car.IteratedBestResponseCar object at 0x1391f1550>'
+sssS'<car.IteratedBestResponseCar object at 0x13a535b50>'
 p66
 (dp67
 S'reward_h'
@@ -284,9 +284,8 @@ sg26
 S'maintain_speed_lsr_and_prev_opt'
 p94
 sg14
-S'maintain_speed_lsr_and_prev_opt'
-p95
+g94
 ssS'USE_SECOND_ORDER'
-p96
+p95
 I01
 ss.

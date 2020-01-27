@@ -149,7 +149,9 @@ def get_initial_states(scenario):
     elif scenario == 'double_merge':
         x0_r = np.array([constants.RIGHT_LANE_CENTER, 0.0, np.pi / 2., initial_speed_r])
         x0_h = np.array([constants.RIGHT_LANE_CENTER, 0.185, np.pi / 2., initial_speed_h])
-
+    elif scenario == 'speedup':
+        x0_r = np.array([constants.LEFT_LANE_CENTER, 0.0, np.pi / 2., initial_speed_r])
+        x0_h = np.array([constants.RIGHT_LANE_CENTER, 0.1948, np.pi / 2., initial_speed_h])
     # elif scenario == 'truck_cut_in_hard_merge_human_lets_robot_in':
     #     x0_r = np.array([0.13, 40. * constants.METERS_TO_VIS, np.pi/2., constants.METERS_TO_VIS * 39.])
     #     x0_h = np.array([0.0, 50. * constants.METERS_TO_VIS, np.pi/2., constants.METERS_TO_VIS * 30.])

@@ -430,10 +430,15 @@ class IteratedBestResponseMaximizer(object):
         for v, (a, b) in zip(self.plan_h, self.control_indices_h):
             v.set_value(opt_plan_h[a:b])
 
+        opt_plan_r = np.hstack((0, 8 * 0.0878) for _ in range(self.traj_r.horizon))
+        for v, (a, b) in zip(self.plan_r, self.control_indices_r):
+            v.set_value(opt_plan_r[a:b])
+
         #pdb.set_trace()
         for i in range(5):
-            opt_r = self.maximize_r(bounds=bounds)
+
             opt_h = self.maximize_h(bounds=bounds)
+            opt_r = self.maximize_r(bounds=bounds)
             #print([x.get_value() for x in self.plan_r])
             #print([x.get_value() for x in self.plan_h])
         #pdb.set_trace()
