@@ -1,16 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="bb300f7b-e26e-4bb8-9add-bdff4e6ec119" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test10/config.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test10/config.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test10/interaction_data.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test10/interaction_data.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test11/config.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test11/config.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test11/interaction_data.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test11/interaction_data.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/optimizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/optimizer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/world.py" beforeDir="false" afterPath="$PROJECT_DIR$/world.py" afterDir="false" />
-    </list>
+    <list default="true" id="bb300f7b-e26e-4bb8-9add-bdff4e6ec119" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -22,8 +13,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/optimizer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="321">
-              <caret line="432" column="35" selection-start-line="432" selection-start-column="35" selection-end-line="432" selection-end-column="35" />
+            <state relative-caret-position="462">
+              <caret line="428" column="35" selection-start-line="428" selection-start-column="35" selection-end-line="428" selection-end-column="35" />
               <folding>
                 <element signature="e#0#16#0" expanded="true" />
                 <element signature="e#645#2354#0" />
@@ -37,8 +28,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/world.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="281">
-              <caret line="153" column="60" selection-start-line="153" selection-start-column="60" selection-end-line="153" selection-end-column="60" />
+            <state relative-caret-position="632">
+              <caret line="154" column="60" selection-start-line="154" selection-start-column="60" selection-end-line="154" selection-end-column="60" />
               <folding>
                 <element signature="e#0#27#0" expanded="true" />
               </folding>
@@ -106,7 +97,7 @@
         <entry file="file://$PROJECT_DIR$/constants.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="252">
-              <caret line="72" column="218" selection-start-line="72" selection-start-column="218" selection-end-line="72" selection-end-column="218" />
+              <caret line="72" column="193" selection-start-line="72" selection-start-column="193" selection-end-line="72" selection-end-column="193" />
             </state>
           </provider>
         </entry>
@@ -515,14 +506,14 @@
     <entry file="file://$PROJECT_DIR$/constants.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="252">
-          <caret line="72" column="218" selection-start-line="72" selection-start-column="218" selection-end-line="72" selection-end-column="218" />
+          <caret line="72" column="193" selection-start-line="72" selection-start-column="193" selection-end-line="72" selection-end-column="193" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/world.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="281">
-          <caret line="153" column="60" selection-start-line="153" selection-start-column="60" selection-end-line="153" selection-end-column="60" />
+        <state relative-caret-position="632">
+          <caret line="154" column="60" selection-start-line="154" selection-start-column="60" selection-end-line="154" selection-end-column="60" />
           <folding>
             <element signature="e#0#27#0" expanded="true" />
           </folding>
@@ -531,8 +522,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/optimizer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="321">
-          <caret line="432" column="35" selection-start-line="432" selection-start-column="35" selection-end-line="432" selection-end-column="35" />
+        <state relative-caret-position="462">
+          <caret line="428" column="35" selection-start-line="428" selection-start-column="35" selection-end-line="428" selection-end-column="35" />
           <folding>
             <element signature="e#0#16#0" expanded="true" />
             <element signature="e#645#2354#0" />
