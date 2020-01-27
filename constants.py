@@ -70,7 +70,7 @@ CAR_CONTROL_BOUNDS = [(-3*0.13/3, 3*0.13/3), (-12*0.0878, 3 * 0.0878)] #
 HIERARCHICAL_HUMAN_CONTROL_BOUNDS = [(-0.104, 0.104), (-0.0878, 0.0878)]
 TRUCK_CONTROL_BOUNDS = [(-5*0.0206, 0.0206)] # m/s^2
 # Options describing the initial states of the cars for different scenarios
-INITIAL_STATE_OPTIONS = ['far_overtaking', 'overtaking', 'easy_merging', 'hard_merging', 'truck_cut_in_human_in_front', 'truck_cut_in_robot_in_front', 'truck_cut_in_hard_merge', 'gap_creation', 'double_merge']
+INITIAL_STATE_OPTIONS = ['far_overtaking', 'overtaking', 'easy_merging', 'hard_merging', 'truck_cut_in_human_in_front', 'truck_cut_in_robot_in_front', 'truck_cut_in_hard_merge', 'gap_creation', 'double_merge', "speedup"]
 # Constant speed of the truck
 TRUCK_CONSTANT_SPEED = METERS_TO_VIS * 26.8224 # corresponds to 60 mph
 
