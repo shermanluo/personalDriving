@@ -131,6 +131,7 @@ def get_initial_states(scenario):
         #x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t, np.pi/2., v0_t])
         #x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t - 0.8764, np.pi/2., v0_t])
         x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t - 0.81, np.pi/2., v0_t])
+        return x0_r, x0_h, x0_t
     elif scenario == 'gap_creation':
         y0_h = 0.
         y0_r = y0_h - 5. * constants.METERS_TO_VIS

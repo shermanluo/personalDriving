@@ -2,13 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="bb300f7b-e26e-4bb8-9add-bdff4e6ec119" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test10/config.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test10/config.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test10/interaction_data.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test10/interaction_data.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test11/config.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test11/config.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/data/interaction_data/test11/interaction_data.pickle" beforeDir="false" afterPath="$PROJECT_DIR$/assets/data/interaction_data/test11/interaction_data.pickle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/optimizer.py" beforeDir="false" afterPath="$PROJECT_DIR$/optimizer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/world.py" beforeDir="false" afterPath="$PROJECT_DIR$/world.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -19,26 +12,23 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/optimizer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="321">
-              <caret line="432" column="35" selection-start-line="432" selection-start-column="35" selection-end-line="432" selection-end-column="35" />
+            <state relative-caret-position="-249">
+              <caret line="428" column="35" selection-start-line="428" selection-start-column="35" selection-end-line="428" selection-end-column="35" />
               <folding>
                 <element signature="e#0#16#0" expanded="true" />
-                <element signature="e#645#2354#0" />
-                <element signature="e#2405#3154#0" />
-                <element signature="e#3203#3237#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/world.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="281">
-              <caret line="153" column="60" selection-start-line="153" selection-start-column="60" selection-end-line="153" selection-end-column="60" />
+            <state relative-caret-position="228">
+              <caret line="133" column="31" selection-start-line="133" selection-start-column="31" selection-end-line="133" selection-end-column="31" />
               <folding>
                 <element signature="e#0#27#0" expanded="true" />
               </folding>
@@ -105,8 +95,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/constants.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="252">
-              <caret line="72" column="218" selection-start-line="72" selection-start-column="218" selection-end-line="72" selection-end-column="218" />
+            <state relative-caret-position="237">
+              <caret line="72" column="177" selection-start-line="72" selection-start-column="177" selection-end-line="72" selection-end-column="177" />
             </state>
           </provider>
         </entry>
@@ -123,8 +113,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/reward.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1755">
-              <caret line="127" column="23" selection-start-line="127" selection-start-column="23" selection-end-line="127" selection-end-column="23" />
+            <state relative-caret-position="1770">
+              <caret line="128" column="23" selection-start-line="128" selection-start-column="23" selection-end-line="128" selection-end-column="23" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -202,8 +192,8 @@
         <option value="$PROJECT_DIR$/reward.py" />
         <option value="$PROJECT_DIR$/config.py" />
         <option value="$PROJECT_DIR$/constants.py" />
-        <option value="$PROJECT_DIR$/world.py" />
         <option value="$PROJECT_DIR$/optimizer.py" />
+        <option value="$PROJECT_DIR$/world.py" />
       </list>
     </option>
   </component>
@@ -477,8 +467,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/reward.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1755">
-          <caret line="127" column="23" selection-start-line="127" selection-start-column="23" selection-end-line="127" selection-end-column="23" />
+        <state relative-caret-position="1770">
+          <caret line="128" column="23" selection-start-line="128" selection-start-column="23" selection-end-line="128" selection-end-column="23" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>
@@ -514,30 +504,27 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/constants.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
-          <caret line="72" column="218" selection-start-line="72" selection-start-column="218" selection-end-line="72" selection-end-column="218" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/world.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="281">
-          <caret line="153" column="60" selection-start-line="153" selection-start-column="60" selection-end-line="153" selection-end-column="60" />
-          <folding>
-            <element signature="e#0#27#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="237">
+          <caret line="72" column="177" selection-start-line="72" selection-start-column="177" selection-end-line="72" selection-end-column="177" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/optimizer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="321">
-          <caret line="432" column="35" selection-start-line="432" selection-start-column="35" selection-end-line="432" selection-end-column="35" />
+        <state relative-caret-position="-249">
+          <caret line="428" column="35" selection-start-line="428" selection-start-column="35" selection-end-line="428" selection-end-column="35" />
           <folding>
             <element signature="e#0#16#0" expanded="true" />
-            <element signature="e#645#2354#0" />
-            <element signature="e#2405#3154#0" />
-            <element signature="e#3203#3237#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/world.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="228">
+          <caret line="133" column="31" selection-start-line="133" selection-start-column="31" selection-end-line="133" selection-end-column="31" />
+          <folding>
+            <element signature="e#0#27#0" expanded="true" />
           </folding>
         </state>
       </provider>
