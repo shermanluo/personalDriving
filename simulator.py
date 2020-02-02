@@ -112,7 +112,7 @@ class Simulator(object):
 
                 # debugging
                 # print('{0} x: {1}'.format(car.name, car.traj.x0[0]))
-                print('{0} y: {1}'.format(car.name, car.traj.x0[1]))
+                print('{0} state: {1}'.format(car.name, car.traj.x0))
                 # print('{0} heading: {1}'.format(car.name, car.traj.x0[2]))
                 # print('{0} speed: {1}'.format(car.name, car.traj.x0[3]))
             # Update position of the robot car's belief of the human trajectory

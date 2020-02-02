@@ -133,19 +133,19 @@ def get_initial_states(scenario):
         x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t - 0.81, np.pi/2., v0_t])
         return x0_r, x0_h, x0_t
     elif scenario == 'gap_creation':
-        y0_h = 0.
+        y0_h = 0.03
         y0_r = y0_h - 5. * constants.METERS_TO_VIS
         y0_t = y0_h + config.FRONT_Y_REL
         v0_h = constants.METERS_TO_VIS * 31.
         v0_r = constants.METERS_TO_VIS * 31
         #v0_t = constants.TRUCK_CONSTANT_SPEED
-        v0_t = constants.METERS_TO_VIS*30.0
+        v0_t = constants.METERS_TO_VIS*30.5
         # states
-        x0_r = np.array([constants.RIGHT_LANE_CENTER, y0_h - 0.3, np.pi / 2., v0_r])
-        x0_h = np.array([0.0, y0_h, np.pi / 2., v0_h])
+        x0_r = np.array([0.12029137, 2.23159753 - 0.038, 1.56994064, 1.08007198])
+        x0_h = np.array([0.00565269, 2.0847318 - 0.055,  1.57074153, 1.07798508])
         # x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t, np.pi/2., v0_t])
         # x0_t = np.array([constants.RIGHT_LANE_CENTER, y0_t - 0.8764, np.pi/2., v0_t])
-        x0_t = np.array([constants.LEFT_LANE_CENTER, y0_t - 1.4, np.pi / 2., v0_t])
+        x0_t = np.array([1.24674009e-16, 2.66608108e+00, 1.57079633e+00, 1.07162162e+00])
         return x0_r, x0_h, x0_t
     elif scenario == 'double_merge':
         x0_r = np.array([constants.RIGHT_LANE_CENTER, 0.0, np.pi / 2., initial_speed_r])

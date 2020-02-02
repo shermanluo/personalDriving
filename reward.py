@@ -147,7 +147,6 @@ class Reward(object):
                 lane_gaussian_std = constants.LANE_REWARD_STDEV_h
             else:
                 lane_gaussian_std = constants.LANE_REWARD_STDEV_r
-            print("lane", w_lane)
             state_r += w_lane * lane.gaussian(fw=fw, stdev=lane_gaussian_std)
         for fence, w_fence in zip(self.world.fences, self.w_fences):
             if self.fence_sigmoid: # sigmoid fence reward

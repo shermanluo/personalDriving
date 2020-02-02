@@ -26,6 +26,7 @@ R_BELIEF_H_KNOWS_TRAJ_R = True
 # If True, robot will predict that human's reward is independent of the robot's 
 # trajectory (i.e. human ignores the robot).
 PREDICT_HUMAN_IGNORES_ROBOT = False
+HUMAN_IGNORES_ROBOT = False
 
 ### Optimization
 OPT_TIMEOUT = 0.1 # max time for optimization (planning)
